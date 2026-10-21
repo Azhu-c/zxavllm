@@ -1,8 +1,18 @@
 # DyntraLB：TPOT 修复与同实例动态 DP→CP
 
-代码保存在本目录，基于 [PR #12292](https://github.com/vllm-project/vllm-ascend/pull/12292) 的 head `2a982061275a8de5f9a05a99ae5adb9d6a1d0b50`，分支 `dyntralb-tpot-cp`。所有修改未提交、未推送，也没有改动你的部署脚本。
+代码基于 [PR #12292](https://github.com/vllm-project/vllm-ascend/pull/12292) 的 head `2a982061275a8de5f9a05a99ae5adb9d6a1d0b50`，维护于 [Azhu-c/zxavllm 的 dyntralb-tpot-cp 分支](https://github.com/Azhu-c/zxavllm/tree/dyntralb-tpot-cp)。部署脚本由你维护。
 
 目标配置按你确认的信息处理：**Qwen3.5-35B-A3B、Ascend 910、Decode DP8/TP1/EP、MTP=3**。你服务器的 vLLM 为 `0.26.1rc1.dev183`；这里修改的是 vllm-ascend，未修改 vLLM。本地没有 vLLM/torch-npu/NPU，尚不能确认与服务器环境的端到端兼容性。
+
+## 源码安装
+
+在现有服务的容器或虚拟环境中，将完整源码目录切换到本分支后执行：
+
+```bash
+python -m pip install -e . --no-deps --no-build-isolation
+```
+
+仓库随附固定版本的 CATLASS 头文件压缩包和 SHA256 文件。缺少 CATLASS 时，构建脚本会先校验并解压该包，不要求父源码目录包含 `.git`，也不需要从 GitCode 下载该依赖。请保留 `.gitmodules`、`catlass-41bf90da-headers.tar.gz` 及其 `.sha256` 文件；仅上传 `vllm_ascend/` 不能完成完整源码构建。CANN、编译器及其他构建依赖仍使用服务器环境。详细说明见 [CATLASS 安装修复](INSTALL_CATLASS_OFFLINE.md)。
 
 ## TPOT 问题与修改
 

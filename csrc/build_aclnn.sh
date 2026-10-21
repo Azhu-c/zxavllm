@@ -11,23 +11,61 @@ log() {
 setup_catlass_dependency() {
     local catlass_path="${ROOT_DIR}/csrc/third_party/catlass/include"
     local catlass_commit
+    local catlass_archive
     local absolute_catlass_path
 
-    git config --global --add safe.directory "$ROOT_DIR"
-    catlass_commit=$(git config -f "${ROOT_DIR}/.gitmodules" --get submodule.csrc/third_party/catlass.commit)
-    if [[ ! -d "${catlass_path}" ]]; then
-        echo "dependency catlass is missing, try to fetch it..."
-        git submodule sync
-        if ! git submodule update --init --recursive; then
-            log "fetch failed"
-            exit 1
-        fi
-        cd "${ROOT_DIR}/csrc/third_party/catlass" || exit 1
-        git fetch origin
-        git checkout "${catlass_commit}" || exit 1
-        cd - || exit 1
+    catlass_commit=$(git config -f "${ROOT_DIR}/.gitmodules" --get submodule.csrc/third_party/catlass.commit) || {
+        log "cannot read the pinned CATLASS commit from ${ROOT_DIR}/.gitmodules"
+        exit 1
+    }
+    if [[ ! "$catlass_commit" =~ ^[0-9a-f]{40}$ ]]; then
+        log "invalid pinned CATLASS commit: ${catlass_commit}"
+        exit 1
     fi
-    absolute_catlass_path=$(cd "${catlass_path}" && pwd)
+    catlass_archive="${ROOT_DIR}/catlass-${catlass_commit:0:8}-headers.tar.gz"
+    if [[ ! -d "${catlass_path}" ]]; then
+        if [[ -f "${catlass_archive}" ]]; then
+            log "restoring CATLASS ${catlass_commit} from the bundled headers"
+            if ! (
+                cd "${ROOT_DIR}" || exit 1
+                if command -v sha256sum >/dev/null 2>&1; then
+                    sha256sum -c "${catlass_archive##*/}.sha256"
+                else
+                    shasum -a 256 -c "${catlass_archive##*/}.sha256"
+                fi
+            ); then
+                log "CATLASS archive checksum verification failed"
+                exit 1
+            fi
+            if ! tar -xzf "${catlass_archive}" -C "${ROOT_DIR}"; then
+                log "CATLASS archive extraction failed"
+                exit 1
+            fi
+        else
+            if [[ ! -e "${ROOT_DIR}/.git" ]]; then
+                log "CATLASS is missing and this source directory has no Git metadata; restore ${catlass_archive} and its .sha256 file"
+                exit 1
+            fi
+            log "dependency catlass is missing, try to fetch the submodule..."
+            git -c safe.directory="${ROOT_DIR}" -C "${ROOT_DIR}" submodule sync -- csrc/third_party/catlass || exit 1
+            if ! git -c safe.directory="${ROOT_DIR}" -C "${ROOT_DIR}" submodule update --init --recursive -- csrc/third_party/catlass; then
+                log "fetch failed; alternatively restore ${catlass_archive} and its .sha256 file"
+                exit 1
+            fi
+            (
+                cd "${ROOT_DIR}/csrc/third_party/catlass" || exit 1
+                if ! git -c safe.directory="$PWD" cat-file -e "${catlass_commit}^{commit}" 2>/dev/null; then
+                    git -c safe.directory="$PWD" fetch origin "${catlass_commit}" || exit 1
+                fi
+                git -c safe.directory="$PWD" checkout --detach "${catlass_commit}"
+            ) || exit 1
+        fi
+    fi
+    if [[ ! -f "${catlass_path}/catlass/catlass.hpp" || ! -f "${catlass_path}/tla/layout.hpp" ]]; then
+        log "CATLASS headers are incomplete in ${catlass_path}"
+        exit 1
+    fi
+    absolute_catlass_path=$(cd "${catlass_path}" && pwd) || exit 1
     export CPATH="${absolute_catlass_path}${CPATH:+:${CPATH}}"
     log "catlass include=${absolute_catlass_path}"
 }
