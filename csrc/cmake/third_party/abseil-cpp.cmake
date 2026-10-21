@@ -43,15 +43,18 @@ else()
     message(STATUS "[ThirdPartyLib][abseil-cpp] ${REQ_URL} not found, need download.")
   endif()
 
+  include("${CMAKE_CURRENT_LIST_DIR}/offline_archive.cmake")
+  vllm_ascend_dependency_url(REQ_URL "${ABSEIL_VERSION_PKG}" "${REQ_URL}")
   ExternalProject_Add(abseil_build_transformer
-                      URL ${REQ_URL}
+                      URL "${REQ_URL}"
+                      URL_HASH "SHA256=${REQ_URL_SHA256}"
                       DOWNLOAD_DIR ${CANN_3RD_LIB_PATH}/pkg
                       PATCH_COMMAND patch -p1 < ${CMAKE_CURRENT_LIST_DIR}/build/modules/patch/protobuf-hide_absl_symbols.patch
                       SOURCE_DIR ${ABSEIL_SOURCE_DIR}
                       CONFIGURE_COMMAND ""
                       BUILD_COMMAND ""
                       INSTALL_COMMAND ""
-                      EXCLUDE_FROM_ALL TRUE 
+                      EXCLUDE_FROM_ALL TRUE
   )
 
   ExternalProject_Get_Property(abseil_build_transformer SOURCE_DIR)

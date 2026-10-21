@@ -140,8 +140,8 @@ function set_env() {
 }
 
 function build() {
-    cd ${PATH_TO_BUILD}
-    cmake ${PATH_TO_SOURCE} \
+    cd "${PATH_TO_BUILD}" || return
+    cmake "${PATH_TO_SOURCE}" \
         -DBUILD_OPEN_PROJECT=${BUILD_OPEN_PROJECT} \
         -DPREPARE_BUILD=ON \
         -DCUSTOM_ASCEND_CANN_PACKAGE_PATH=${ASCEND_CANN_PACKAGE_PATH} \
@@ -164,7 +164,7 @@ function build() {
         -DCANN_3RD_LIB_PATH=${CANN_3RD_LIB_PATH} \
         -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
         -DVERSION=${VERSION} \
-        -DENABLE_OOM=${ENABLE_OOM}
+        -DENABLE_OOM=${ENABLE_OOM} || return $?
         
     make ${JOB_NUM} prepare_build
 }

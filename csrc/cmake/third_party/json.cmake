@@ -44,11 +44,13 @@ if(json_FOUND AND NOT FORCE_REBUILD_CANN_3RD)
     add_library(json INTERFACE IMPORTED)
 else()
     set(REQ_URL "https://gitcode.com/cann-src-third-party/json/releases/download/v3.11.3/include.zip")
+    include("${CMAKE_CURRENT_LIST_DIR}/offline_archive.cmake")
+    vllm_ascend_dependency_url(REQ_URL "include.zip" "${REQ_URL}")
 
     include(ExternalProject)
     ExternalProject_Add(third_party_json
-            URL ${REQ_URL}
-            TLS_VERIFY OFF
+            URL "${REQ_URL}"
+            URL_HASH "SHA256=${REQ_URL_SHA256}"
             DOWNLOAD_DIR ${JSON_DOWNLOAD_PATH}
             DOWNLOAD_NO_EXTRACT TRUE
             SOURCE_DIR ${JSON_INSTALL_PATH}
@@ -56,7 +58,7 @@ else()
             BUILD_COMMAND ""
             INSTALL_COMMAND
                 ${CMAKE_COMMAND} -E make_directory ${JSON_INSTALL_PATH} &&
-                ${CMAKE_COMMAND} -E chdir ${JSON_INSTALL_PATH} ${CMAKE_COMMAND} -E tar xf "${JSON_DOWNLOAD_PATH}/include.zip" --format=zip
+                ${CMAKE_COMMAND} -E chdir ${JSON_INSTALL_PATH} ${CMAKE_COMMAND} -E tar xf "<DOWNLOADED_FILE>" --format=zip
             UPDATE_COMMAND ""
     )
 

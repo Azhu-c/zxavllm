@@ -32,3 +32,11 @@ python -m pip install -e . --no-deps --no-build-isolation
 - 未在 Ascend 服务器执行完整构建，后续其他构建错误需要按新的错误处理。
 
 `listing git files failed` 和 `0.0.0` 可能仍出现在无 Git 信息的源码构建日志中；当前附件里的致命退出来自 catlass 的 submodule fetch，补头文件解决的是这一处退出。
+
+## makeself 及其他 CMake 构建依赖
+
+若后续出现 `makeself-populate-download`、`Build step for makeself failed`，说明失败在 makeself 下载或验证步骤。后面的 `No rule to make target prepare_build` 是配置未完成导致的连带错误。
+
+本分支现将 makeself、JSON、Abseil 和 Protobuf 的固定版本源码包保存在 [构建依赖目录](csrc/cmake/third_party/archives/README.md)，CMake 会先校验并使用这些本地文件。请更新完整分支源码，保留 `csrc/cmake/third_party/archives/` 及 `SHA256SUMS`，然后在原服务环境中重新运行前面的安装命令。已有的 CANN、芯片型号和模型启动配置继续沿用。
+
+同时修正了 makeself 的执行权限路径、JSON 本地压缩包的实际位置，以及配置失败后仍继续执行 `make` 的行为。无需因为这段错误将 CMake 降级，也无需删除原服务的已编译算子来重试。完整 Ascend 编译尚待服务器验证。

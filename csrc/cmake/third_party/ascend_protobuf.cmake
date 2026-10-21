@@ -41,11 +41,15 @@ else()
         message(STATUS "[ThirdPartyLib][ascend protobuf] ${REQ_URL} not found, need download.")
     endif()
     
+    include("${CMAKE_CURRENT_LIST_DIR}/offline_archive.cmake")
+    vllm_ascend_dependency_url(REQ_URL "${PROTOBUF_VERSION_PKG}" "${REQ_URL}")
+
     set(protobuf_CXXFLAGS "-Wno-maybe-uninitialized -Wno-unused-parameter -fPIC -fstack-protector-all -D_FORTIFY_SOURCE=2 -D_GLIBCXX_USE_CXX11_ABI=0 -O2 -Dgoogle=ascend_private")
     set(protobuf_LDFLAGS "-Wl,-z,relro,-z,now,-z,noexecstack")
 
     ExternalProject_Add(ascend_protobuf_build_transformer
-                        URL ${REQ_URL}
+                        URL "${REQ_URL}"
+                        URL_HASH "SHA256=${REQ_URL_SHA256}"
                         DOWNLOAD_DIR ${CANN_3RD_LIB_PATH}/pkg
                         PATCH_COMMAND patch -p1 < ${CMAKE_CURRENT_LIST_DIR}/build/modules/patch/protobuf_25.1_change_version.patch
                         CONFIGURE_COMMAND ${CMAKE_COMMAND}
