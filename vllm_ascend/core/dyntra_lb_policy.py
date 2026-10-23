@@ -30,3 +30,50 @@ class DyntraLBPausePolicy:
     def discard(self, request_id: str) -> None:
         self.paused_at.pop(request_id, None)
         self.protected_until.pop(request_id, None)
+
+
+@dataclass
+class DyntraLBFirstTokenPolicy:
+    """Bound LB-only admission deferrals before the first generated token.
+
+    A bypass only opens the LB gate: KV readiness, batch capacity, priorities,
+    and token budgets still belong to the normal scheduler. The per-step cap
+    limits extra admission attempts; this is not an end-to-end TTFT deadline.
+    """
+
+    max_wait_steps: int
+    max_admissions_per_step: int
+    deferred: dict[str, tuple[int, int]] = field(default_factory=dict)
+    admission_step: int = -1
+    admissions_this_step: int = 0
+    admitted: set[str] = field(default_factory=set)
+
+    def can_admit(self, request_id: str, step: int, selected: bool, has_output: bool) -> bool:
+        if has_output:
+            self.discard(request_id)
+            return selected
+        if selected:
+            # A selection need not result in computation (KV/budgets can block
+            # it). Preserve the deferral history until output or request cleanup.
+            return True
+        if self.admission_step != step:
+            self.admission_step = step
+            self.admissions_this_step = 0
+            self.admitted.clear()
+        if request_id in self.admitted:
+            return True
+        count, last_step = self.deferred.get(request_id, (0, -1))
+        if count >= self.max_wait_steps:
+            if self.admissions_this_step < self.max_admissions_per_step:
+                self.admitted.add(request_id)
+                self.admissions_this_step += 1
+                return True
+            return False
+        if last_step != step:
+            self.deferred[request_id] = count + 1, step
+        return False
+
+    def discard(self, request_id: str) -> None:
+        self.deferred.pop(request_id, None)
+        # Cleanup must not refund an admission already attempted this step.
+        self.admitted.discard(request_id)

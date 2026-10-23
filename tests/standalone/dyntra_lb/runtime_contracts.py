@@ -15,7 +15,13 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import numpy as np
-from source_modules import DyntraLBConfig, DyntraLBPausePolicy, balance_load
+from source_modules import (
+    DyntraLBConfig,
+    DyntraLBFirstTokenPolicy,
+    DyntraLBPausePolicy,
+    balance_load,
+    balance_load_original,
+)
 
 ROOT = Path(__file__).resolve().parents[3]
 
@@ -89,6 +95,7 @@ def load_scheduler():
         SchedulingPolicy=SchedulingPolicy,
         DyntraLBConfig=DyntraLBConfig,
         DyntraLBPausePolicy=DyntraLBPausePolicy,
+        DyntraLBFirstTokenPolicy=DyntraLBFirstTokenPolicy,
         time=time,
     )
     exec(compile(ast.fix_missing_locations(tree), str(path), "exec"), ns)
@@ -114,6 +121,7 @@ def load_engine(block_num):
     ns = dict(
         DPEngineCoreProc=BaseEngine,
         balance_load=balance_load,
+        balance_load_original=balance_load_original,
         np=np,
         torch=SimpleNamespace(as_tensor=lambda arr: arr),
         dist=dist,

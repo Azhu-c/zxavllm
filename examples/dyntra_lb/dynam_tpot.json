@@ -1,0 +1,19 @@
+{
+  "scheduler_config": {
+    "dyntra_lb_config": {
+      "enabled": true,
+      "enable_diagnostics": false,
+      "mode": "dynamic",
+      "start_step": 0,
+      "end_step": -1,
+      "bubble_threshold": 5.0,
+      "long_req_block_threshold": 700,
+      "dynamic_max_step": 256,
+      "balance_interval": 1,
+      "dynamic_cp_config": {
+        "enabled": false
+      },
+      "policy_profile": "tpot"
+    }
+  }
+}

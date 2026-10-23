@@ -27,6 +27,7 @@ from vllm.v1.request import Request
 import vllm_ascend.patch.platform.patch_balance_schedule as _balance_patch
 from vllm_ascend.ascend_config import get_ascend_config, init_ascend_config
 from vllm_ascend.core.dyntra_lb_config import DyntraLBConfig
+from vllm_ascend.core.dyntra_lb_original import balance_load_original
 from vllm_ascend.core.dyntra_lb_planner import balance_load
 from vllm_ascend.core.dyntra_lb_scheduler import (
     diagnostics_enabled,
@@ -124,6 +125,9 @@ class DyntraLBDPEngineCoreProc(DPEngineCoreProc):
             "with_request_indices": True,
             "max_pauses_per_rank": dyntra_lb_config.max_pauses_per_rank,
         }
+        if dyntra_lb_config.policy_profile != "tpot":
+            self._balance_load = balance_load_original
+            self._lb_planner_options = {}
         cp_config = dyntra_lb_config.dynamic_cp_config
         if cp_config.enabled:
             block_size = vllm_config.cache_config.block_size
@@ -137,6 +141,11 @@ class DyntraLBDPEngineCoreProc(DPEngineCoreProc):
         self._lb_pending_long_req_blk = 0
 
         _print_rank_0("dyntra_lb_config.enabled = True", self.dp_rank, self._lb_enable_diagnostics)
+        _print_rank_0(
+            f"dyntra_lb_config.policy_profile = {dyntra_lb_config.policy_profile}",
+            self.dp_rank,
+            self._lb_enable_diagnostics,
+        )
         _print_rank_0(
             f"dyntra_lb_config.enable_diagnostics = {self._lb_enable_diagnostics}",
             self.dp_rank,
@@ -330,6 +339,9 @@ class DyntraLBDPEngineCoreProc(DPEngineCoreProc):
             self._lb_enable_diagnostics,
         )
         local_plan = modifications[self.dp_rank]
+        if "out_slots" not in local_plan:
+            self.scheduler.modifications = local_plan
+            return has_new_long_req
         local_snapshot = running_snapshot[:run_cnt] + waiting_snapshot[:wait_cnt]
         self.scheduler.modifications = {
             **local_plan,

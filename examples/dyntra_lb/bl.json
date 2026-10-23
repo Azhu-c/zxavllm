@@ -1,0 +1,8 @@
+{
+  "scheduler_config": {
+    "dyntra_lb_config": {
+      "enabled": false,
+      "enable_diagnostics": false
+    }
+  }
+}

@@ -38,3 +38,6 @@ def load_source(name):
 DyntraLBConfig = load_source("dyntra_lb_config").DyntraLBConfig
 balance_load = load_source("dyntra_lb_planner").balance_load
 DyntraLBPausePolicy = load_source("dyntra_lb_policy").DyntraLBPausePolicy
+
+balance_load_original = load_source("dyntra_lb_original").balance_load_original
+DyntraLBFirstTokenPolicy = load_source("dyntra_lb_policy").DyntraLBFirstTokenPolicy

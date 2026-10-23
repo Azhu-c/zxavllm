@@ -13,6 +13,9 @@ class DyntraLBConfig:
         "enabled": False,
         "enable_diagnostics": False,
         "mode": "dynamic",
+        "policy_profile": "tpot",
+        "first_token_max_lb_wait_steps": 4,
+        "first_token_max_admissions_per_step": 1,
         "start_step": 250,
         "end_step": -1,
         "bubble_threshold": 5.0,
@@ -45,6 +48,7 @@ class DyntraLBConfig:
             self._defaults["enable_diagnostics"],
         )
         self.mode = user_config.get("mode", self._defaults["mode"])
+        self.policy_profile = user_config.get("policy_profile", self._defaults["policy_profile"])
         self.start_step = user_config.get("start_step", self._defaults["start_step"])
         self.end_step = user_config.get("end_step", self._defaults["end_step"])
         self.bubble_threshold = user_config.get("bubble_threshold", self._defaults["bubble_threshold"])
@@ -55,6 +59,8 @@ class DyntraLBConfig:
         self.dynamic_max_step = user_config.get("dynamic_max_step", self._defaults["dynamic_max_step"])
         self.dynamic_cp_config = DynamicCPConfig(user_config.get("dynamic_cp_config"))
         for key in (
+            "first_token_max_lb_wait_steps",
+            "first_token_max_admissions_per_step",
             "balance_interval",
             "max_pause_steps",
             "min_run_steps",
@@ -67,6 +73,10 @@ class DyntraLBConfig:
         self._validate_config()
 
     def _validate_config(self):
+        if not isinstance(self.policy_profile, str) or self.policy_profile not in {"original", "tpot", "ttft"}:
+            raise ValueError("dyntra_lb_config.policy_profile must be original, tpot, or ttft")
+        if self.dynamic_cp_config.enabled and self.policy_profile != "tpot":
+            raise ValueError("The original/TTFT comparison profiles require dynamic_cp_config.enabled=false")
         if self.dynamic_cp_config.enabled and not self.enabled:
             raise ValueError("dynamic_cp_config requires dyntra_lb_config.enabled=true")
         if not isinstance(self.enabled, bool):
@@ -79,6 +89,8 @@ class DyntraLBConfig:
             raise ValueError(f"dyntra_lb_config.mode must be one of {sorted(self._valid_modes)}, got {self.mode!r}.")
 
         for key in (
+            "first_token_max_lb_wait_steps",
+            "first_token_max_admissions_per_step",
             "start_step",
             "end_step",
             "long_req_block_threshold",
@@ -120,7 +132,13 @@ class DyntraLBConfig:
             )
         if self.dynamic_max_step <= 0:
             raise ValueError(f"dyntra_lb_config.dynamic_max_step must be > 0, got {self.dynamic_max_step}.")
-        for key in ("balance_interval", "max_pause_steps", "min_run_steps"):
+        for key in (
+            "balance_interval",
+            "max_pause_steps",
+            "min_run_steps",
+            "first_token_max_lb_wait_steps",
+            "first_token_max_admissions_per_step",
+        ):
             if getattr(self, key) <= 0:
                 raise ValueError(f"dyntra_lb_config.{key} must be > 0, got {getattr(self, key)}.")
         if self.max_pauses_per_rank < 0:

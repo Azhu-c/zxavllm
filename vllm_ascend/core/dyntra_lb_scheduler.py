@@ -29,7 +29,7 @@ from vllm.v1.request import Request, RequestStatus
 from vllm.v1.utils import record_function_or_nullcontext
 
 from vllm_ascend.core.dyntra_lb_config import DyntraLBConfig
-from vllm_ascend.core.dyntra_lb_policy import DyntraLBPausePolicy
+from vllm_ascend.core.dyntra_lb_policy import DyntraLBFirstTokenPolicy, DyntraLBPausePolicy
 
 if TYPE_CHECKING:
     from vllm.v1.core.sched.scheduler import Scheduler as _SchedulerBase
@@ -137,6 +137,11 @@ class DyntraLBPolicyMixin(_SchedulerBase):
         dyntra_lb_user_config = scheduler_extension_config.get("dyntra_lb_config") or {}
         dyntra_lb_config = DyntraLBConfig(dyntra_lb_user_config)
         self._enable_diagnostics = dyntra_lb_config.enable_diagnostics
+        self._lb_policy_profile = dyntra_lb_config.policy_profile
+        self._lb_first_token_policy = DyntraLBFirstTokenPolicy(
+            dyntra_lb_config.first_token_max_lb_wait_steps,
+            dyntra_lb_config.first_token_max_admissions_per_step,
+        )
         self._lb_pause_policy = DyntraLBPausePolicy(dyntra_lb_config.max_pause_steps, dyntra_lb_config.min_run_steps)
         self.modifications: dict | None = None
         self.lb_freeze: bool = False
@@ -249,6 +254,12 @@ class DyntraLBPolicyMixin(_SchedulerBase):
         return self._lb_admission_candidates
 
     def _apply_load_balance_modifications(self) -> None:
+        if self._lb_policy_profile != "tpot":
+            self._apply_original_lb_modifications()
+            # TTFT plans are consumed once; original keeps the PR behavior.
+            if self._lb_policy_profile == "ttft":
+                self.modifications = None
+            return
         self._lb_admit_req_ids = None
         modifications = self.modifications
         # Plans refer to a particular snapshot and must only be applied once.
@@ -323,8 +334,61 @@ class DyntraLBPolicyMixin(_SchedulerBase):
                     self._lb_pause_request(req, scheduled_timestamp)
                     slots_needed -= 1
 
+    def _apply_original_lb_modifications(self) -> None:
+        self._lb_admit_req_ids = None
+        if self.modifications is None:
+            self.lb_freeze = False
+            return
+
+        out_blks = self.modifications["out_blk"]
+        in_blks = self.modifications["in_blk"]
+        self.lb_freeze = self.modifications["freeze"]
+        scheduled_timestamp = time.monotonic()
+
+        def req_blk_num(req: Request) -> int:
+            return get_dyntra_lb_request_block_num(self, req)
+
+        remaining_out = list(out_blks)
+        for priority_filter in (
+            lambda r: getattr(r, "lb_newly_added", False),
+            lambda r: True,
+        ):
+            if not remaining_out:
+                break
+            for req in list(self.running):
+                if not remaining_out:
+                    break
+                blk_num = req_blk_num(req)
+                # Protect only requests that have not generated their first token.
+                # Existing decode requests retain the original pause policy.
+                if self._lb_policy_profile == "ttft" and req.num_output_tokens == 0:
+                    continue
+                if blk_num in remaining_out and priority_filter(req):
+                    remaining_out.remove(blk_num)
+                    self.running.remove(req)
+                    self._lb_pause_request(req, scheduled_timestamp)
+
+        remaining_in = [] if self.lb_freeze else list(in_blks)
+        admit_req_ids: set[str] = set()
+        for req in self._lb_admission_candidates:
+            if not remaining_in:
+                break
+            blk_num = req_blk_num(req)
+            if blk_num in remaining_in:
+                remaining_in.remove(blk_num)
+                admit_req_ids.add(req.request_id)
+        self._lb_admit_req_ids = admit_req_ids
+
     def _can_admit_waiting_request(self, request: Request) -> bool:
-        return self._lb_admit_req_ids is None or request.request_id in self._lb_admit_req_ids
+        selected = self._lb_admit_req_ids is None or request.request_id in self._lb_admit_req_ids
+        if self._lb_policy_profile != "ttft":
+            return selected
+        admitted = self._lb_first_token_policy.can_admit(
+            request.request_id, self.current_step, selected, request.num_output_tokens > 0
+        )
+        if admitted and not selected and self._enable_diagnostics:
+            logger.info("DYNTRA_TTFT_BYPASS request_id=%s step=%d", request.request_id, self.current_step)
+        return admitted
 
     @staticmethod
     def _scheduler_output_supports(field_name: str) -> bool:
@@ -454,6 +518,7 @@ class DyntraLBPolicyMixin(_SchedulerBase):
     ) -> dict[str, Any] | None | tuple[dict[str, Any] | None, dict[str, Any] | None]:
         self._lb_paused_req_ids.discard(request.request_id)
         self._lb_pause_policy.discard(request.request_id)
+        self._lb_first_token_policy.discard(request.request_id)
         return super()._free_request(request, delay_free_blocks)
 
 
