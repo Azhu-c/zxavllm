@@ -13,28 +13,69 @@
 
 两个条件复用完全相同的 prompt 和输出长度，改变的只有目标 Decode rank。生成器使用实际 tokenizer 计数，并保存长度与 prompt 哈希。`mixed_prompts.jsonl` 兼容参考仓库的 custom dataset 格式；它不含 rank 路由信息，正式实验请使用本目录客户端读取 `placement.jsonl`。
 
-## 在 NPU 机器上准备
+## 运行顺序：四个终端窗口
 
-需要已有的 8P8D P/D 部署及参考仓库本地副本。客户端需要 `httpx`，生成数据还需要 `transformers`。先把本目录的两个 `.py` 文件复制到 NPU 机器。
+**Prefill、Decode、代理都是常驻服务。启动后保留各自的终端窗口，不需要等命令结束。** 第四个窗口运行请求客户端；它跑完一组实验后会退出。以下命令以参考脚本中的 `61.28.30.29` 为例，若 NPU 机器地址不同，四个窗口都要使用实际地址。
+
+### 准备一次
+
+在 NPU 机器上保留 [DyntraLB 仓库](https://github.com/Ydr-pku/DyntraLB)的本地副本，并把本目录的 `motivation1.py`、`prepare_reference.py` 复制过去。客户端需要 `httpx`，生成请求还需要 `transformers`。先执行：
 
 ```bash
 python3 prepare_reference.py --repo /path/to/DyntraLB
 ```
 
-启动 Prefill 时继续用参考仓库的 `scripts/run_vllm_serve_8p8d_asyncSched_p.sh`。启动 Decode 时改用生成的 `scripts/run_vllm_serve_8p8d_asyncSched_d_profile.sh`；它关闭 DyntraLB，并给 Decode 加上 `--profiler-config`。根据机器环境设置原脚本要求的 `MODEL_PATH`、`HOST_IP`、设备号等参数。这个实验先不启用 MTP，以保持每请求每步一个 decode token。
+它在仓库 `scripts/` 下生成 `load_balance_proxy_server_ranked.py` 和 `run_vllm_serve_8p8d_asyncSched_d_profile.sh`，原始脚本仍在。若要重新生成，添加 `--force`。
 
-启动生成的代理副本，例如：
+### 窗口 1：启动 Prefill，保持运行
 
 ```bash
-python3 /path/to/DyntraLB/scripts/load_balance_proxy_server_ranked.py \
-  --host 127.0.0.1 --port 8080 \
-  --prefiller-hosts 127.0.0.1 --prefiller-ports 13700 \
-  --decoder-hosts 127.0.0.1 --decoder-ports 13701
+cd /path/to/DyntraLB/scripts
+export MODEL_PATH=/path/to/model
+export SERVED_MODEL_NAME=qwen3_30B
+bash run_vllm_serve_8p8d_asyncSched_p.sh
 ```
 
-若服务分布在不同主机，把各个地址换成实际可达地址。参考仓库的 `run_proxy_server.sh` 使用 `--prefiller-port`，而代理参数名是 `--prefiller-ports`；上面的命令已使用正确参数。
+参考 Prefill 脚本把 IP `61.28.30.29` 和设备 `8–15` 写在文件中。若机器配置不同，先改好脚本中所有对应的 IP 和设备设置。**先启动 Prefill**：参考脚本会在启动前检查是否已有 vLLM 进程。
 
-## 生成并运行
+### 窗口 2：启动 Decode，保持运行
+
+```bash
+cd /path/to/DyntraLB/scripts
+export MODEL_PATH=/path/to/model
+export SERVED_MODEL_NAME=qwen3_30B
+export HOST_IP=61.28.30.29
+bash run_vllm_serve_8p8d_asyncSched_d_profile.sh
+```
+
+这个脚本以原始无 DyntraLB 的 Decode 配置为基础，增加了 profiler 配置；默认使用设备 `0–7`。本实验先不启用 MTP，以保持每请求每步一个 decode token。
+
+### 窗口 3：启动代理，保持运行
+
+```bash
+cd /path/to/DyntraLB/scripts
+export HOST_IP=61.28.30.29
+python3 load_balance_proxy_server_ranked.py \
+  --host "$HOST_IP" --port 8080 \
+  --prefiller-hosts "$HOST_IP" --prefiller-ports 13700 \
+  --decoder-hosts "$HOST_IP" --decoder-ports 13701
+```
+
+**看到代理启动并持续占用终端是正常的，不要等它“跑完”。** 参考仓库的 `run_proxy_server.sh` 使用 `--prefiller-port`，而代理参数名是 `--prefiller-ports`；这里已使用正确参数。若 P、D 分布在不同主机，分别填写它们可达的地址。
+
+### 窗口 4：检查服务、生成请求、运行实验
+
+```bash
+export HOST_IP=61.28.30.29
+export MODEL_PATH=/path/to/model
+export SERVED_MODEL_NAME=qwen3_30B
+
+curl -fsS "http://$HOST_IP:13700/v1/models"
+curl -fsS "http://$HOST_IP:13701/v1/models"
+curl -fsS "http://$HOST_IP:8080/healthcheck"
+```
+
+三个检查都成功后，在保存 `motivation1.py` 的目录运行：
 
 ```bash
 python3 motivation1.py generate \
@@ -46,8 +87,8 @@ python3 motivation1.py generate \
 python3 motivation1.py run \
   --manifest ./motivation1-workload/placement.jsonl \
   --condition balanced \
-  --proxy-url http://127.0.0.1:8080 \
-  --decoder-url http://127.0.0.1:13701 \
+  --proxy-url "http://$HOST_IP:8080" \
+  --decoder-url "http://$HOST_IP:13701" \
   --model "$SERVED_MODEL_NAME" \
   --run-id r1 \
   --output-dir ./motivation1-results
@@ -55,12 +96,14 @@ python3 motivation1.py run \
 python3 motivation1.py run \
   --manifest ./motivation1-workload/placement.jsonl \
   --condition skewed \
-  --proxy-url http://127.0.0.1:8080 \
-  --decoder-url http://127.0.0.1:13701 \
+  --proxy-url "http://$HOST_IP:8080" \
+  --decoder-url "http://$HOST_IP:13701" \
   --model "$SERVED_MODEL_NAME" \
   --run-id r1 \
   --output-dir ./motivation1-results
 ```
+
+`generate` 只生成文件，也可以在启动三个服务前执行。两个 `run` 命令需要依次执行：等 balanced 返回终端提示符，再运行 skewed。整个过程中，窗口 1–3 的服务始终保持运行。
 
 客户端对每个请求发送 `X-data-parallel-rank`。代理将该头转发给 Decode，并在响应中回传 `X-Requested-DP-Rank` 和代理内部请求 ID。客户端会核对目标 rank，并保存代理请求 ID 以便对应服务日志；若没有运行修改后的代理，会直接报错。vLLM 的 [DP 路由文档](https://docs.vllm.ai/projects/ascend/en/latest/user_guide/feature_guide/rl.html)说明了该请求头。
 
