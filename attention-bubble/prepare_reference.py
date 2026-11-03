@@ -93,6 +93,32 @@ def patch_decoder(source: str) -> str:
     return source
 
 
+def patch_local_decoder(source: str) -> str:
+    source = patch_decoder(source)
+    source = replace_once(
+        source,
+        'exec vllm serve "$MODEL_PATH" \\\n',
+        ': "${EXPERIMENT_PYTHON_DIR:?Set EXPERIMENT_PYTHON_DIR to the directory containing scheduler_probe.py}"\n'
+        ': "${BUBBLE_STATE_DIR:?Set BUBBLE_STATE_DIR to an absolute directory for scheduler snapshots}"\n'
+        '[[ "$BUBBLE_STATE_DIR" = /* ]] || { echo "BUBBLE_STATE_DIR must be absolute" >&2; exit 1; }\n'
+        '[[ -f "$EXPERIMENT_PYTHON_DIR/scheduler_probe.py" ]] || { echo "scheduler_probe.py not found" >&2; exit 1; }\n'
+        'mkdir -p "$BUBBLE_STATE_DIR"\n'
+        'export PYTHONPATH="$EXPERIMENT_PYTHON_DIR${PYTHONPATH:+:$PYTHONPATH}"\n'
+        'export BUBBLE_STATE_DIR\n'
+        'exec vllm serve "$MODEL_PATH" \\\n',
+        "local experiment environment",
+    )
+    source = replace_once(
+        source,
+        '  --max-num-seqs 64 \\\n',
+        '  --max-num-seqs 4 \\\n'
+        '  --async-scheduling \\\n'
+        '  --scheduler-cls scheduler_probe.ProbeAsyncScheduler \\\n',
+        "local experiment scheduler",
+    )
+    return source
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", type=Path, required=True, help="Local DyntraLB clone")
@@ -104,6 +130,8 @@ def main() -> None:
          "load_balance_proxy_server_ranked.py", patch_proxy),
         ("run_vllm_serve_8p8d_asyncSched_d_original.sh",
          "run_vllm_serve_8p8d_asyncSched_d_profile.sh", patch_decoder),
+        ("run_vllm_serve_8p8d_asyncSched_d_original.sh",
+         "run_vllm_serve_8p8d_asyncSched_d_local_pairs.sh", patch_local_decoder),
     )
     prepared = []
     for input_name, output_name, transform in jobs:
