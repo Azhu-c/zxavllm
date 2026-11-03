@@ -1,0 +1,48 @@
+--- a/vllm_ascend/core/dyntra_lb_planner.py
++++ b/vllm_ascend/core/dyntra_lb_planner.py
+@@ -116,12 +116,10 @@
+                 if mode == "decrease" and delta >= 0:
+                     continue
+                 new_tot = card["tot_blk"] + delta
+-                # Reducing distance to the average is insufficient: increasing
+-                # the global maximum makes every decoding request slower.
+                 new_max = max(new_tot, other_max)
+-                if new_max > old_max:
+-                    continue
+-                if not run_item["newly_added"]:
++                # Ablation: allow an average-improving swap even if it raises
++                # the global maximum. Retain the gain gate for other swaps.
++                if not run_item["newly_added"] and new_max <= old_max:
+                     new_latency = step_latency_fixed_us + step_latency_per_block_us * new_max
+                     if old_latency / new_latency - 1 < min_throughput_gain:
+                         continue
+--- a/tests/standalone/dyntra_lb/test_planner.py
++++ b/tests/standalone/dyntra_lb/test_planner.py
+@@ -7,11 +7,22 @@
+ from source_modules import DyntraLBConfig, DyntraLBPausePolicy, balance_load
+ 
+ 
+-def test_swap_must_not_increase_global_step_latency():
+-    # The old distance-to-average heuristic replaces 1 with 150, increasing
+-    # the global maximum from 100 to 150 while the bubble gets smaller.
+-    plan = balance_load([([100], 1), ([1, 150], 1)], 2, threshold=1, min_throughput_gain=0)
+-    assert not any(p["out_blk"] or p["in_blk"] for p in plan)
++def test_ablation_allows_swap_that_increases_global_maximum():
++    # The ablation restores the average-based choice, including for an
++    # original running request with the default throughput-gain threshold.
++    plan = balance_load([([100], 1), ([1, 150], 1)], 2, max_num_seqs=1, threshold=1)
++    assert plan[0]["out_blk"] == []
++    assert plan[1]["out_blk"] == [1]
++    assert plan[1]["in_blk"] == [150]
++
++
++def test_ablation_keeps_gain_gate_when_global_maximum_does_not_increase():
++    ranks = [([100], 1), ([1, 2], 1)]
++    protected = balance_load(ranks, 2, max_num_seqs=1, threshold=1)
++    assert protected[1]["out_blk"] == []
++    unguarded = balance_load(ranks, 2, max_num_seqs=1, threshold=1, min_throughput_gain=0)
++    assert unguarded[1]["out_blk"] == [1]
++    assert unguarded[1]["in_blk"] == [2]
+ 
+ 
+ def test_legacy_absolute_and_relative_thresholds():
