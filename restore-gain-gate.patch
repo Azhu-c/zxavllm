@@ -1,0 +1,38 @@
+--- a/vllm_ascend/core/dyntra_lb_planner.py
++++ b/vllm_ascend/core/dyntra_lb_planner.py
+@@ -117,9 +117,8 @@
+                     continue
+                 new_tot = card["tot_blk"] + delta
+                 new_max = max(new_tot, other_max)
+-                # Ablation: allow an average-improving swap even if it raises
+-                # the global maximum. Retain the gain gate for other swaps.
+-                if not run_item["newly_added"] and new_max <= old_max:
++                # Retain the gain gate for requests running before this plan.
++                if not run_item["newly_added"]:
+                     new_latency = step_latency_fixed_us + step_latency_per_block_us * new_max
+                     if old_latency / new_latency - 1 < min_throughput_gain:
+                         continue
+--- a/tests/standalone/dyntra_lb/test_planner.py
++++ b/tests/standalone/dyntra_lb/test_planner.py
+@@ -7,16 +7,14 @@
+ from source_modules import DyntraLBConfig, DyntraLBPausePolicy, balance_load
+ 
+ 
+-def test_ablation_allows_swap_that_increases_global_maximum():
+-    # The ablation restores the average-based choice, including for an
+-    # original running request with the default throughput-gain threshold.
++def test_gain_gate_blocks_maximum_increase_for_original_running_request():
++    # With the existing step-latency model, a higher maximum cannot yield
++    # the required 2% throughput gain for this one-for-one exchange.
+     plan = balance_load([([100], 1), ([1, 150], 1)], 2, max_num_seqs=1, threshold=1)
+-    assert plan[0]["out_blk"] == []
+-    assert plan[1]["out_blk"] == [1]
+-    assert plan[1]["in_blk"] == [150]
++    assert not any(row["out_blk"] or row["in_blk"] for row in plan)
+ 
+ 
+-def test_ablation_keeps_gain_gate_when_global_maximum_does_not_increase():
++def test_gain_gate_still_applies_when_global_maximum_does_not_increase():
+     ranks = [([100], 1), ([1, 2], 1)]
+     protected = balance_load(ranks, 2, max_num_seqs=1, threshold=1)
+     assert protected[1]["out_blk"] == []
