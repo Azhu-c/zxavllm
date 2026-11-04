@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """在服务器上直接对比两组 Ascend profiler 数据。"""
 import csv, json, math, re, statistics
+from collections import Counter
 from pathlib import Path
 
 RUN = "r1"
@@ -47,7 +48,7 @@ for key in ("manifest_sha256", "model"):
         raise RuntimeError(f"两组 {key} 不一致，不能比较")
 
 from torch_npu.profiler.profiler import analyse
-ops, steps = {}, {}
+ops, steps, unnumbered = {}, {}, {}
 for condition in conditions:
     for rank, path in sorted(profiles[condition].items()):
         out = path / "ASCEND_PROFILER_OUTPUT"
@@ -77,10 +78,18 @@ for condition in conditions:
             found[key] = (old_count + count, old_total + total)
         ops[condition, rank] = found
         values = {"Computing": [], "Communication(Not Overlapped)": [], "Free": []}
+        blank_rows = []
         step_file = out / "step_trace_time.csv"
         if step_file.is_file():
             for row in read_csv(step_file):
                 step = str(get(row, "Step", "Step ID", "Step Id") or "").strip()
+                if step.lower() in ("", "n/a", "none", "null"):
+                    names = ("Computing", "Communication", "Overlapped", "Communication(Not Overlapped)", "Free")
+                    totals = {name: num(get(row, name, name + "(us)")) for name in names}
+                    totals = {name: value / 1000 for name, value in totals.items() if value is not None and value >= 0}
+                    if totals:
+                        blank_rows.append((str(get(row, "Device_id", "Device ID") or "?"), totals))
+                    continue
                 if not re.fullmatch(r"(?:ProfilerStep#)?\d+", step):
                     continue
                 for name in values:
@@ -88,6 +97,7 @@ for condition in conditions:
                     if value is not None and value >= 0:
                         values[name].append(value)
         steps[condition, rank] = {k: statistics.median(v) / 1000 for k, v in values.items() if v}
+        unnumbered[condition, rank] = blank_rows
 
 common = set.intersection(*(set(v) for v in ops.values()))
 common = sorted(common, key=lambda k: sum(v[k][0] for v in ops.values()), reverse=True)
@@ -108,6 +118,35 @@ print("\n逐 rank step 统计中位数（毫秒，仅使用明确编号的 step�
 for condition in conditions:
     for rank in range(8):
         values = steps[condition, rank]
-        text = ", ".join(f"{k}={v:.3f}" for k, v in values.items()) or "无可用 step 记录"
+        text = ", ".join(f"{k}={v:.3f}" for k, v in values.items()) or "无明确编号的 step 统计"
         print(f"{condition} dp{rank}: {text}")
+print("\nStep 无编号的原始统计行（毫秒；统计范围待确认，不能当作单步时间）")
+for condition in conditions:
+    for rank in range(8):
+        blank_rows = unnumbered[condition, rank]
+        if not blank_rows:
+            print(f"{condition} dp{rank}: 无可显示的未编号统计行")
+        for index, (device, values) in enumerate(blank_rows, 1):
+            text = ", ".join(f"{k}={v:.3f}" for k, v in values.items())
+            print(f"{condition} dp{rank} device={device} 行{index}/{len(blank_rows)}: {text}")
+
+print("\n通信候选检查（仅查看 dp0 和 dp4 的 kernel_details.csv）")
+communication_pattern = re.compile(r"hccl|hcom|all.?to.?all|all.?gather|all.?reduce|reduce.?scatter", re.I)
+for condition in conditions:
+    for rank in (0, 4):
+        path = profiles[condition][rank] / "ASCEND_PROFILER_OUTPUT" / "kernel_details.csv"
+        found = Counter()
+        if path.is_file():
+            for row in read_csv(path):
+                name = (row.get("Name") or "").strip()
+                kind = (row.get("Type") or "").strip()
+                core = (row.get("Accelerator Core") or "").strip()
+                if communication_pattern.search(" ".join((name, kind, core))):
+                    found[(name, kind)] += 1
+        if found:
+            print(f"{condition} dp{rank}: {sum(found.values())} 条候选记录，前 5 类：")
+            for (name, kind), count in found.most_common(5):
+                print(f"  {name} | {kind} | {count} 条")
+        else:
+            print(f"{condition} dp{rank}: 未找到通信候选记录（不代表没有通信）")
 print("\n注意：Free 是设备空闲，不等于跨 rank 等待；需核对同一步同一层的设备时间线。")
