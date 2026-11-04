@@ -1,0 +1,407 @@
+--- a/vllm_ascend/core/dyntra_lb_wire.py
++++ /dev/null
+@@ -1,39 +0,0 @@
+-# SPDX-License-Identifier: Apache-2.0
+-# SPDX-FileCopyrightText: Copyright contributors to the vLLM project
+-
+-"""Compact, lossless encoding of a DyntraLB rank's planning snapshot."""
+-
+-
+-def encode_snapshot(blocks: list[int], running_count: int, pending_long: bool) -> bytes:
+-    if not 0 <= running_count <= len(blocks):
+-        raise ValueError("running count exceeds snapshot length")
+-    data = bytearray()
+-    for value in (running_count, int(pending_long), *blocks):
+-        if value < 0:
+-            raise ValueError("snapshot values must be nonnegative")
+-        while value >= 128:
+-            data.append((value & 127) | 128)
+-            value >>= 7
+-        data.append(value)
+-    return bytes(data)
+-
+-
+-def decode_snapshot(data: bytes) -> tuple[list[int], int, bool]:
+-    values: list[int] = []
+-    value = shift = 0
+-    for byte in data:
+-        value |= (byte & 127) << shift
+-        if byte & 128:
+-            shift += 7
+-            if shift > 63:
+-                raise ValueError("snapshot varint is too large")
+-        else:
+-            values.append(value)
+-            value = shift = 0
+-    if shift or len(values) < 2 or values[1] not in (0, 1):
+-        raise ValueError("invalid snapshot")
+-    running_count, pending_long = values[:2]
+-    blocks = values[2:]
+-    if running_count > len(blocks):
+-        raise ValueError("running count exceeds snapshot length")
+-    return blocks, running_count, bool(pending_long)
+--- a/vllm_ascend/patch/platform/patch_dyntra_lb_core.py
++++ b/vllm_ascend/patch/platform/patch_dyntra_lb_core.py
+@@ -32,7 +32,6 @@
+     diagnostics_enabled,
+     get_dyntra_lb_request_block_num,
+ )
+-from vllm_ascend.core.dyntra_lb_wire import decode_snapshot, encode_snapshot
+ 
+ RequestStatus = _request_module.RequestStatus
+ _ORIGINAL_HAS_GLOBAL_UNFINISHED_REQS = DPEngineCoreProc._has_global_unfinished_reqs
+@@ -181,6 +180,11 @@
+         self._lb_max_slots_cached = max_slots
+         self._lb_max_num_seqs = max_num_seqs
+ 
++        full_len = max_slots + 2
++        self._lb_data_np = np.zeros(full_len, dtype=np.int32)
++        self._lb_data_t = torch.as_tensor(self._lb_data_np)
++        self._lb_all_data_np = [np.zeros(full_len, dtype=np.int32) for _ in range(dp_size)]
++        self._lb_all_data_t_buf = [torch.as_tensor(arr) for arr in self._lb_all_data_np]
+         self._lb_dynamic_flag_np: np.ndarray = np.zeros(2, dtype=np.int32)
+         self._lb_dynamic_flag_t = torch.as_tensor(self._lb_dynamic_flag_np)
+ 
+@@ -287,31 +291,26 @@
+         running_blks = [get_dyntra_lb_request_block_num(self.scheduler, req) for req in running_snapshot]
+         waiting_blks = [get_dyntra_lb_request_block_num(self.scheduler, req) for req in waiting_snapshot]
+ 
+-        run_cnt = len(running_blks)
+-        wait_cnt = len(waiting_blks)
+-        payload = encode_snapshot(running_blks + waiting_blks, run_cnt, self._lb_pending_long_req)
++        arr = self._lb_data_np
++        arr[:] = 0
++        run_cnt = min(len(running_blks), max_slots)
++        wait_cnt = min(len(waiting_blks), max_slots - run_cnt)
++        arr[:run_cnt] = running_blks[:run_cnt]
++        arr[run_cnt : run_cnt + wait_cnt] = waiting_blks[:wait_cnt]
++        arr[max_slots] = run_cnt
++        arr[max_slots + 1] = int(self._lb_pending_long_req)
+         self._lb_pending_long_req = False
+         self._lb_pending_long_req_blk = 0
+ 
+-        # Exchange lengths first, then pad only to the largest actual encoded
+-        # snapshot in this round. Every rank participates, including idle ranks.
+-        local_size = np.array([len(payload)], dtype=np.int32)
+-        sizes = [np.zeros(1, dtype=np.int32) for _ in range(dp_size)]
+-        dist.all_gather([torch.as_tensor(size) for size in sizes], torch.as_tensor(local_size), group=self.dp_group)
+-        max_size = max(int(size[0]) for size in sizes)
+-        local_payload = np.zeros(max_size, dtype=np.uint8)
+-        local_payload[: len(payload)] = np.frombuffer(payload, dtype=np.uint8)
+-        gathered = [np.zeros(max_size, dtype=np.uint8) for _ in range(dp_size)]
+-        dist.all_gather(
+-            [torch.as_tensor(data) for data in gathered], torch.as_tensor(local_payload), group=self.dp_group
+-        )
++        dist.all_gather(self._lb_all_data_t_buf, self._lb_data_t, group=self.dp_group)
+ 
+         requests_by_rank = []
+         has_new_long_req = False
+-        for rank_data, size in zip(gathered, sizes):
+-            blocks, split, pending_long = decode_snapshot(rank_data[: int(size[0])].tobytes())
+-            requests_by_rank.append((blocks, split))
+-            has_new_long_req = has_new_long_req or pending_long
++        for rank_np in self._lb_all_data_np:
++            split = int(rank_np[max_slots])
++            blks = rank_np[:max_slots].tolist()
++            requests_by_rank.append((blks, split))
++            has_new_long_req = has_new_long_req or bool(rank_np[max_slots + 1])
+ 
+         modifications = self._balance_load(
+             requests_by_rank,
+--- a/tests/standalone/dyntra_lb/runtime_contracts.py
++++ b/tests/standalone/dyntra_lb/runtime_contracts.py
+@@ -15,7 +15,7 @@
+ from unittest.mock import MagicMock
+ 
+ import numpy as np
+-from source_modules import DyntraLBConfig, DyntraLBPausePolicy, balance_load, load_source
++from source_modules import DyntraLBConfig, DyntraLBPausePolicy, balance_load
+ 
+ ROOT = Path(__file__).resolve().parents[3]
+ 
+@@ -118,8 +118,6 @@
+     ns = dict(
+         DPEngineCoreProc=BaseEngine,
+         balance_load=balance_load,
+-        encode_snapshot=load_source("dyntra_lb_wire").encode_snapshot,
+-        decode_snapshot=load_source("dyntra_lb_wire").decode_snapshot,
+         np=np,
+         torch=SimpleNamespace(as_tensor=lambda arr: arr),
+         dist=dist,
+--- a/tests/standalone/dyntra_lb/test_runtime_contracts.py
++++ b/tests/standalone/dyntra_lb/test_runtime_contracts.py
+@@ -124,18 +124,12 @@
+     a, b = request("a", 40_000), request("b", 40_000)
+     waiting = request("wait", 8, RequestStatus.WAITING)
+     engine.scheduler.running = [a, b]
+-    from source_modules import load_source
+-
+-    wire = load_source("dyntra_lb_wire")
+-    remote = wire.encode_snapshot([1], 1, False)
++    remote = [1, 0, 0, 0, 1, 0]
+     engine.scheduler._run_lb_kv_prefetch = MagicMock()
+ 
+     def gather(outputs, local, group):
+         np.copyto(outputs[0], local)
+-        if local.dtype == np.int32:
+-            outputs[1][0] = len(remote)
+-        else:
+-            outputs[1][: len(remote)] = np.frombuffer(remote, dtype=np.uint8)
++        outputs[1][:] = remote
+ 
+     dist.all_gather.side_effect = gather
+     engine._do_lb_allgather([waiting])
+@@ -146,27 +140,50 @@
+     engine.scheduler._run_lb_kv_prefetch.assert_called_once_with({"wait"})
+ 
+ 
+-
+ def test_gather_handles_idle_remote_rank_and_frozen_plan():
+-    from source_modules import load_source
+-
+     engine, dist = make_engine({"mode": "static", "start_step": 0})
+     engine.scheduler._run_lb_kv_prefetch = MagicMock()
+     engine.scheduler.running = [request("running", 80000)]
+-    remote = load_source("dyntra_lb_wire").encode_snapshot([], 0, True)
++    remote = [0, 0, 0, 0, 0, 1]
+ 
+     def gather(outputs, local, group):
+         np.copyto(outputs[0], local)
+-        if local.dtype == np.int32:
+-            outputs[1][0] = len(remote)
+-        else:
+-            outputs[1][: len(remote)] = np.frombuffer(remote, dtype=np.uint8)
++        outputs[1][:] = remote
+ 
+     dist.all_gather.side_effect = gather
+     assert engine._do_lb_allgather([])
+     assert engine.scheduler.modifications["freeze"]
+     engine.scheduler._run_lb_kv_prefetch.assert_not_called()
++    assert dist.all_gather.call_count == 1
++
++
++def test_fixed_size_gather_resets_unused_slots_and_pending_flag():
++    engine, dist = make_engine({"mode": "static", "start_step": 0})
++    engine.scheduler._run_lb_kv_prefetch = MagicMock()
++    engine._balance_load = MagicMock(
++        return_value=[
++            {"out_blk": [], "in_blk": [], "freeze": True, "out_slots": [], "in_slots": []},
++            {"out_blk": [], "in_blk": [], "freeze": True, "out_slots": [], "in_slots": []},
++        ]
++    )
++    local_snapshots = []
++
++    def gather(outputs, local, group):
++        local_snapshots.append(local.copy())
++        np.copyto(outputs[0], local)
++        outputs[1].fill(0)
++
++    dist.all_gather.side_effect = gather
++    engine.scheduler.running = [request("running", 16)]
++    engine._lb_pending_long_req = True
++    engine._do_lb_allgather([request("wait", 8, RequestStatus.WAITING)])
++    engine.scheduler.running = []
++    engine._do_lb_allgather([])
++
++    assert [snapshot.tolist() for snapshot in local_snapshots] == [[2, 1, 0, 0, 1, 1], [0, 0, 0, 0, 0, 0]]
+     assert dist.all_gather.call_count == 2
++    engine.scheduler._run_lb_kv_prefetch.assert_not_called()
++
+ 
+ def test_priority_deadline_does_not_evict_higher_priority_work():
+     class RankedRequest(SimpleNamespace):
+--- a/tests/standalone/dyntra_lb/test_compact_snapshot.py
++++ /dev/null
+@@ -1,95 +0,0 @@
+-# SPDX-License-Identifier: Apache-2.0
+-# SPDX-FileCopyrightText: Copyright contributors to the vLLM project
+-
+-import random
+-import unittest
+-from types import SimpleNamespace
+-from unittest.mock import MagicMock
+-
+-from runtime_contracts import RequestStatus, load_scheduler
+-from source_modules import balance_load, load_source
+-
+-wire = load_source("dyntra_lb_wire")
+-
+-
+-class CompactSnapshotTests(unittest.TestCase):
+-    def test_round_trip_and_planner_equivalence(self):
+-        snapshots = [([12, 50000, 7, 4], 2, True), ([], 0, False), ([3, 3, 400], 1, False)]
+-        decoded = [wire.decode_snapshot(wire.encode_snapshot(*row)) for row in snapshots]
+-        self.assertEqual(decoded, snapshots)
+-        original = [(blocks, split) for blocks, split, _ in snapshots]
+-        restored = [(blocks, split) for blocks, split, _ in decoded]
+-        self.assertEqual(balance_load(original, 3, max_num_seqs=2, with_request_indices=True),
+-                         balance_load(restored, 3, max_num_seqs=2, with_request_indices=True))
+-        self.assertLess(len(wire.encode_snapshot([20] * 8, 4, False)), (256 * 2 + 2) * 4)
+-
+-    def test_randomized_plans_preserve_slot_identity(self):
+-        rng = random.Random(12292)
+-        for _ in range(250):
+-            snapshots = []
+-            for _rank in range(8):
+-                running = rng.randrange(5)
+-                waiting = rng.randrange(5)
+-                blocks = [rng.randint(1, 100000) for _ in range(running + waiting)]
+-                snapshots.append((blocks, running, bool(rng.randrange(2))))
+-            decoded = [wire.decode_snapshot(wire.encode_snapshot(*row)) for row in snapshots]
+-            self.assertEqual(decoded, snapshots)
+-            padded = [(blocks + [0] * (8 - len(blocks)), split) for blocks, split, _ in snapshots]
+-            compact = [(blocks, split) for blocks, split, _ in decoded]
+-            self.assertEqual(balance_load(padded, 8, max_num_seqs=4, with_request_indices=True),
+-                             balance_load(compact, 8, max_num_seqs=4, with_request_indices=True))
+-
+-    def test_invalid_payloads(self):
+-        for payload in (b"", b"\x00\x80", b"\x00\x02", b"\x01\x00"):
+-            with self.subTest(payload=payload), self.assertRaises(ValueError):
+-                wire.decode_snapshot(payload)
+-
+-    def test_prefetch_only_selected_and_retry_after_failure(self):
+-        scheduler_class, _ = load_scheduler()
+-        scheduler = scheduler_class(vllm_config=SimpleNamespace(additional_config={}))
+-        scheduler._lb_kv_prefetch_enabled = True
+-        scheduler.connector = MagicMock()
+-        scheduler.connector.get_num_new_matched_tokens.return_value = (8, True)
+-        scheduler.kv_cache_manager = MagicMock()
+-        scheduler.kv_cache_manager.get_computed_blocks.return_value = ([], 0, 0)
+-        scheduler.kv_cache_manager.allocate_slots.return_value = None
+-        scheduler.scheduler_reserve_full_isl = False
+-        first = SimpleNamespace(request_id="selected", status=RequestStatus.WAITING, num_computed_tokens=0)
+-        second = SimpleNamespace(request_id="other", status=RequestStatus.WAITING, num_computed_tokens=0)
+-        scheduler.waiting.items = [first, second]
+-        self.assertEqual(scheduler._run_lb_kv_prefetch({"selected"}), {"selected"})
+-        self.assertEqual(scheduler.connector.get_num_new_matched_tokens.call_count, 1)
+-        self.assertIs(scheduler.connector.get_num_new_matched_tokens.call_args.args[0], first)
+-        self.assertEqual(first.num_computed_tokens, 0)
+-        self.assertEqual(second.num_computed_tokens, 0)
+-        self.assertEqual(scheduler._run_lb_kv_prefetch(set()), set())
+-        self.assertEqual(scheduler.connector.get_num_new_matched_tokens.call_count, 1)
+-
+-    def test_selected_async_prefetch_moves_only_that_request(self):
+-        class HashableRequest(SimpleNamespace):
+-            __hash__ = object.__hash__
+-
+-        scheduler_class, _ = load_scheduler()
+-        scheduler = scheduler_class(vllm_config=SimpleNamespace(additional_config={}))
+-        scheduler._lb_kv_prefetch_enabled = True
+-        scheduler.connector = MagicMock()
+-        scheduler.connector.get_num_new_matched_tokens.return_value = (8, True)
+-        scheduler.kv_cache_manager = MagicMock()
+-        scheduler.kv_cache_manager.get_computed_blocks.return_value = ([], 0, 0)
+-        scheduler.kv_cache_manager.allocate_slots.return_value = object()
+-        scheduler.scheduler_reserve_full_isl = False
+-        scheduler._inflight_prefills = set()
+-        selected = HashableRequest(request_id="selected", status=RequestStatus.WAITING, num_computed_tokens=0)
+-        other = HashableRequest(request_id="other", status=RequestStatus.WAITING, num_computed_tokens=0)
+-        scheduler.waiting.items = [selected, other]
+-        self.assertEqual(scheduler._run_lb_kv_prefetch({"selected"}), set())
+-        self.assertEqual(selected.status, RequestStatus.WAITING_FOR_REMOTE_KVS)
+-        self.assertEqual(selected.num_computed_tokens, 8)
+-        self.assertEqual(list(scheduler.skipped_waiting), [selected])
+-        self.assertEqual(list(scheduler.waiting), [other])
+-        self.assertEqual(scheduler._inflight_prefills, {selected})
+-        scheduler.connector.update_state_after_alloc.assert_called_once()
+-
+-
+-if __name__ == "__main__":
+-    unittest.main()
+--- /dev/null
++++ b/tests/standalone/dyntra_lb/test_targeted_prefetch.py
+@@ -0,0 +1,61 @@
++# SPDX-License-Identifier: Apache-2.0
++# SPDX-FileCopyrightText: Copyright contributors to the vLLM project
++
++import unittest
++from types import SimpleNamespace
++from unittest.mock import MagicMock
++
++from runtime_contracts import RequestStatus, load_scheduler
++
++
++class TargetedPrefetchTests(unittest.TestCase):
++    def test_prefetch_only_selected_and_retry_after_failure(self):
++        scheduler_class, _ = load_scheduler()
++        scheduler = scheduler_class(vllm_config=SimpleNamespace(additional_config={}))
++        scheduler._lb_kv_prefetch_enabled = True
++        scheduler.connector = MagicMock()
++        scheduler.connector.get_num_new_matched_tokens.return_value = (8, True)
++        scheduler.kv_cache_manager = MagicMock()
++        scheduler.kv_cache_manager.get_computed_blocks.return_value = ([], 0, 0)
++        scheduler.kv_cache_manager.allocate_slots.return_value = None
++        scheduler.scheduler_reserve_full_isl = False
++        first = SimpleNamespace(request_id="selected", status=RequestStatus.WAITING, num_computed_tokens=0)
++        second = SimpleNamespace(request_id="other", status=RequestStatus.WAITING, num_computed_tokens=0)
++        scheduler.waiting.items = [first, second]
++        self.assertEqual(scheduler._run_lb_kv_prefetch({"selected"}), {"selected"})
++        self.assertEqual(scheduler.connector.get_num_new_matched_tokens.call_count, 1)
++        self.assertIs(scheduler.connector.get_num_new_matched_tokens.call_args.args[0], first)
++        self.assertEqual(first.num_computed_tokens, 0)
++        self.assertEqual(second.num_computed_tokens, 0)
++        self.assertEqual(scheduler._run_lb_kv_prefetch(set()), set())
++        self.assertEqual(scheduler.connector.get_num_new_matched_tokens.call_count, 1)
++
++    def test_selected_async_prefetch_moves_only_that_request(self):
++        class HashableRequest(SimpleNamespace):
++            __hash__ = object.__hash__
++
++        scheduler_class, _ = load_scheduler()
++        scheduler = scheduler_class(vllm_config=SimpleNamespace(additional_config={}))
++        scheduler._lb_kv_prefetch_enabled = True
++        scheduler.connector = MagicMock()
++        scheduler.connector.get_num_new_matched_tokens.return_value = (8, True)
++        scheduler.kv_cache_manager = MagicMock()
++        scheduler.kv_cache_manager.get_computed_blocks.return_value = ([], 0, 0)
++        scheduler.kv_cache_manager.allocate_slots.return_value = object()
++        scheduler.scheduler_reserve_full_isl = False
++        scheduler._inflight_prefills = set()
++        selected = HashableRequest(request_id="selected", status=RequestStatus.WAITING, num_computed_tokens=0)
++        other = HashableRequest(request_id="other", status=RequestStatus.WAITING, num_computed_tokens=0)
++        scheduler.waiting.items = [selected, other]
++        self.assertEqual(scheduler._run_lb_kv_prefetch({"selected"}), set())
++        self.assertEqual(selected.status, RequestStatus.WAITING_FOR_REMOTE_KVS)
++        self.assertEqual(selected.num_computed_tokens, 8)
++        self.assertEqual(list(scheduler.skipped_waiting), [selected])
++        self.assertEqual(list(scheduler.waiting), [other])
++        self.assertEqual(scheduler._inflight_prefills, {selected})
++        scheduler.connector.update_state_after_alloc.assert_called_once()
++
++
++
++if __name__ == "__main__":
++    unittest.main()
+--- a/tests/ut/patch/platform/test_patch_dyntra_lb_core.py
++++ b/tests/ut/patch/platform/test_patch_dyntra_lb_core.py
+@@ -606,4 +606,4 @@
+ 
+     engine_core._do_lb_allgather(scheduler._lb_admission_candidates)
+ 
+-    assert captured["requests_by_rank"] == [([9, 3, 5], 0)]
++    assert captured["requests_by_rank"] == [([9, 3, 5, 0], 0)]
+--- a/docs/source/user_guide/feature_guide/dyntra_lb.md
++++ b/docs/source/user_guide/feature_guide/dyntra_lb.md
+@@ -172,9 +172,8 @@
+ 1. the current step runs scheduling and model execution
+ 2. all DP ranks synchronize their wave/idle state
+ 3. each rank snapshots its running and schedulable waiting requests
+-4. the ranks exchange the lengths and then the compact, losslessly encoded
+-   KV-block counts across the Decode DP group; each payload is padded only to
+-   the largest actual payload in that round
++4. the ranks all-gather fixed-size arrays of KV-block counts across the Decode
++   DP group, padding unused request slots with zeros
+ 5. the planner generates a per-rank plan that can pause local running requests,
+    admit selected local waiting requests, or freeze new admission
+ 6. only selected waiting requests are considered for asynchronous remote KV
+@@ -188,9 +187,7 @@
+ 
+ A selected request whose remote KV lookup or allocation is not ready remains
+ subject to the scheduler's normal retry and admission checks. Prefetch is not
+-a guarantee that the request will run in the next step. The compact exchange
+-uses two collectives, so its latency and bandwidth tradeoff should be measured
+-on the deployment topology.
++a guarantee that the request will run in the next step.
+ 
+ The planner uses request block counts as a lightweight load estimate. The
+ estimate is intended to reduce DP bubbles; it is not a latency or throughput
