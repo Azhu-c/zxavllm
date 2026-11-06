@@ -113,3 +113,95 @@ bash bubble.sh report r1
 - 脚本在本机通过了模拟检查，尚未在真实 NPU 服务器验证。`timing` 的整批完成时间包含两阶段提交和 P/D 处理。`profile` 的设备事件需要确认 rank、step 和时钟对齐后才能分析；可使用 `trace_metrics.py` 汇总已核实并导出的事件。
 
 旧的 32 请求实验说明在 [README-legacy.md](README-legacy.md)。
+
+
+
+
+
+===== skewed dp0 =====
+事件总数: 439303
+通信候选: 345 条；前 8 种名称/类别/类型:
+  69 条 | c10d::allreduce_ | cpu_op | X
+  69 条 | gloo:all_reduce | cpu_op | X
+  69 条 | AscendCL@BroadcastTo_Tiling |  | X
+  69 条 | aclnnInplaceCopy_BroadcastToAiCore_BroadcastTo |  | X
+  69 条 | aclnnIndexPutImpl_BroadcastToAiCore_BroadcastTo |  | X
+  示例: {"name": "c10d::allreduce_", "cat": "cpu_op", "ph": "X", "pid": 3433906, "tid": 3433906, "ts": "1793694078107037.990", "dur": 34.73}
+Attention 候选: 26496 条；前 8 种名称/类别/类型:
+  3312 条 | aclnnFusedInferAttentionScoreV3 | cpu_op | X
+  3312 条 | npu::npu_fused_infer_attention_score | cpu_op | X
+  3312 条 | Dequeue@aclnnFusedInferAttentionScoreV3 | dequeue | X
+  3312 条 | Enqueue@aclnnFusedInferAttentionScoreV3 | enqueue | X
+  3312 条 | AscendCL@aclnnInnerFusedInferAttentionScoreGetWorkspaceSize |  | X
+  3312 条 | AscendCL@aclnnInnerFusedInferAttentionScoreTiling |  | X
+  3312 条 | AscendCL@aclnnInnerFusedInferAttentionScore |  | X
+  3312 条 | FusedInferAttentionScore |  | X
+  示例: {"name": "aclnnFusedInferAttentionScoreV3", "cat": "cpu_op", "ph": "X", "pid": 3433906, "tid": 3433906, "ts": "1793694078140182.460", "dur": 12.57}
+提示：名称匹配是线索；没有匹配不代表没有通信。
+
+===== skewed dp4 =====
+事件总数: 443815
+通信候选: 345 条；前 8 种名称/类别/类型:
+  69 条 | c10d::allreduce_ | cpu_op | X
+  69 条 | gloo:all_reduce | cpu_op | X
+  69 条 | AscendCL@BroadcastTo_Tiling |  | X
+  69 条 | aclnnInplaceCopy_BroadcastToAiCore_BroadcastTo |  | X
+  69 条 | aclnnIndexPutImpl_BroadcastToAiCore_BroadcastTo |  | X
+  示例: {"name": "c10d::allreduce_", "cat": "cpu_op", "ph": "X", "pid": 3433918, "tid": 3433918, "ts": "1793694078113910.650", "dur": 30.39}
+Attention 候选: 26496 条；前 8 种名称/类别/类型:
+  3312 条 | aclnnFusedInferAttentionScoreV3 | cpu_op | X
+  3312 条 | npu::npu_fused_infer_attention_score | cpu_op | X
+  3312 条 | Dequeue@aclnnFusedInferAttentionScoreV3 | dequeue | X
+  3312 条 | Enqueue@aclnnFusedInferAttentionScoreV3 | enqueue | X
+  3312 条 | AscendCL@aclnnInnerFusedInferAttentionScoreGetWorkspaceSize |  | X
+  3312 条 | AscendCL@aclnnInnerFusedInferAttentionScoreTiling |  | X
+  3312 条 | AscendCL@aclnnInnerFusedInferAttentionScore |  | X
+  3312 条 | FusedInferAttentionScore |  | X
+  示例: {"name": "aclnnFusedInferAttentionScoreV3", "cat": "cpu_op", "ph": "X", "pid": 3433918, "tid": 3433918, "ts": "1793694078140167.930", "dur": 11.48}
+提示：名称匹配是线索；没有匹配不代表没有通信。
+
+===== balanced dp0 =====
+事件总数: 484444
+通信候选: 350 条；前 8 种名称/类别/类型:
+  70 条 | c10d::allreduce_ | cpu_op | X
+  70 条 | gloo:all_reduce | cpu_op | X
+  70 条 | AscendCL@BroadcastTo_Tiling |  | X
+  70 条 | aclnnInplaceCopy_BroadcastToAiCore_BroadcastTo |  | X
+  70 条 | aclnnIndexPutImpl_BroadcastToAiCore_BroadcastTo |  | X
+  示例: {"name": "c10d::allreduce_", "cat": "cpu_op", "ph": "X", "pid": 3433906, "tid": 3433906, "ts": "1793694354352407.260", "dur": 32.5}
+Attention 候选: 26880 条；前 8 种名称/类别/类型:
+  3360 条 | aclnnFusedInferAttentionScoreV3 | cpu_op | X
+  3360 条 | npu::npu_fused_infer_attention_score | cpu_op | X
+  3360 条 | Dequeue@aclnnFusedInferAttentionScoreV3 | dequeue | X
+  3360 条 | Enqueue@aclnnFusedInferAttentionScoreV3 | enqueue | X
+  3360 条 | AscendCL@aclnnInnerFusedInferAttentionScoreGetWorkspaceSize |  | X
+  3360 条 | AscendCL@aclnnInnerFusedInferAttentionScoreTiling |  | X
+  3360 条 | AscendCL@aclnnInnerFusedInferAttentionScore |  | X
+  3360 条 | FusedInferAttentionScore |  | X
+  示例: {"name": "aclnnFusedInferAttentionScoreV3", "cat": "cpu_op", "ph": "X", "pid": 3433906, "tid": 3433906, "ts": "1793694354365894.980", "dur": 14.92}
+提示：名称匹配是线索；没有匹配不代表没有通信。
+
+===== balanced dp4 =====
+事件总数: 445936
+通信候选: 350 条；前 8 种名称/类别/类型:
+  70 条 | c10d::allreduce_ | cpu_op | X
+  70 条 | gloo:all_reduce | cpu_op | X
+  70 条 | AscendCL@BroadcastTo_Tiling |  | X
+  70 条 | aclnnInplaceCopy_BroadcastToAiCore_BroadcastTo |  | X
+  70 条 | aclnnIndexPutImpl_BroadcastToAiCore_BroadcastTo |  | X
+  示例: {"name": "c10d::allreduce_", "cat": "cpu_op", "ph": "X", "pid": 3433918, "tid": 3433918, "ts": "1793694354335170.220", "dur": 37.69}
+Attention 候选: 26880 条；前 8 种名称/类别/类型:
+  3360 条 | aclnnFusedInferAttentionScoreV3 | cpu_op | X
+  3360 条 | npu::npu_fused_infer_attention_score | cpu_op | X
+  3360 条 | Dequeue@aclnnFusedInferAttentionScoreV3 | dequeue | X
+  3360 条 | Enqueue@aclnnFusedInferAttentionScoreV3 | enqueue | X
+  3360 条 | AscendCL@aclnnInnerFusedInferAttentionScoreGetWorkspaceSize |  | X
+  3360 条 | AscendCL@aclnnInnerFusedInferAttentionScoreTiling |  | X
+  3360 条 | AscendCL@aclnnInnerFusedInferAttentionScore |  | X
+  3360 条 | FusedInferAttentionScore |  | X
+  示例: {"name": "aclnnFusedInferAttentionScoreV3", "cat": "cpu_op", "ph": "X", "pid": 3433918, "tid": 3433918, "ts": "1793694354365538.870", "dur": 10.12}
+提示：名称匹配是线索；没有匹配不代表没有通信。
+
+
+
+
