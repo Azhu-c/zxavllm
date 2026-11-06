@@ -38,6 +38,7 @@ vllm() {
             --profiler-config.profiler=torch \
             "--profiler-config.torch_profiler_dir=$PROFILE_DIR" \
             --profiler-config.torch_profiler_with_stack=false \
+            --profiler-config.ignore_frontend=true \
             "$@"
     else
         command vllm "$@"
