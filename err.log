@@ -15,3 +15,9 @@ Errors during downloading metadata for repository 'OS':
   - Curl error (6): Couldn't resolve host name for https://repo.openeuler.org/openEuler-24.03-LTS-SP4/OS/aarch64/repodata/repomd.xml [Could not resolve host: repo.openeuler.org]
 Error: Failed to download metadata for repo 'OS': Cannot download repomd.xml: Cannot download repodata/repomd.xml: All mirrors were tried
 ✗ ERROR: Failed to install dnf development packages
+
+
+
+getent hosts repo.openeuler.org
+getent hosts mirrors.openeuler.org
+cat /etc/resolv.conf
