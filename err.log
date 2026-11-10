@@ -1,0 +1,17 @@
+# tail -n 80 xllm-install.log
+I20261110 11:35:54.455980 1595 setup.py:1075] 🚀 Build xllm with CPU arch: arm, target device: npu
+E20261110 11:35:55.163843 1595 utils.py:574] Missing third-party build dependencies: liburing-header, liburing-library, msgpack-cxx, xxhash-header, xxhash-library, yalantinglibs, zstd-header, zstd-library
+I20261110 11:35:55.164055 1595 utils.py:276] 🔎 You can run these commands to inspect manually:
+I20261110 11:35:55.164093 1595 utils.py:278]    cd /workspace/xllm
+I20261110 11:35:55.164127 1595 utils.py:278]    bash scripts/build_support/install_dependencies.sh
+[root@node09 xllm]# bash scripts/build_support/install_dependencies.sh
+Installing to: /usr/local
+
+=== Installing system development packages required by Mooncake ===
+OS                                                                                                                                                           0.0  B/s |   0  B     00:00    
+OS                                                                                                                                                           0.0  B/s |   0  B     00:00    
+Errors during downloading metadata for repository 'OS':
+  - Curl error (6): Couldn't resolve host name for https://mirrors.openeuler.org/metalink?repo=24.03LTS_SP4/OS&arch=aarch64 [Could not resolve host: mirrors.openeuler.org]
+  - Curl error (6): Couldn't resolve host name for https://repo.openeuler.org/openEuler-24.03-LTS-SP4/OS/aarch64/repodata/repomd.xml [Could not resolve host: repo.openeuler.org]
+Error: Failed to download metadata for repo 'OS': Cannot download repomd.xml: Cannot download repodata/repomd.xml: All mirrors were tried
+✗ ERROR: Failed to install dnf development packages
