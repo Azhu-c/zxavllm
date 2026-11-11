@@ -1,0 +1,15 @@
+--- a/vllm_ascend/core/dyntra_lb_scheduler.py
++++ b/vllm_ascend/core/dyntra_lb_scheduler.py
+@@ -1304,6 +1304,12 @@
+             print_scheduler_summary(self, scheduler_output)
+         return scheduler_output
+ 
++
++# Opt-in observational instrumentation; no change when DYNTRA_DATA_DIR is unset.
++import os as _capture_os
++if _capture_os.environ.get("DYNTRA_DATA_DIR"):
++    from dyntra_capture import install as _install_capture
++    _install_capture(DyntraLBScheduler, get_dyntra_lb_request_block_num)
+ 
+ class AsyncDyntraLBScheduler(DyntraLBScheduler, AsyncScheduler):
+     """DyntraLB scheduler with vLLM's asynchronous scheduling semantics."""
