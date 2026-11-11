@@ -44,3 +44,116 @@
 (EngineCore_DP2 pid=89330) INFO 11-06 17:48:35 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [14, 2, 0, 2, 0, 0] | blk num [126, 16, 0] | block size [scheduler=128, dyntra_lb=128]
 (EngineCore_DP4 pid=89332) INFO 11-06 17:48:35 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [9, 7, 0, 7, 0, 0] | blk num [83, 200, 0] | block size [scheduler=128, dyntra_lb=128]
 (EngineCore_DP0 pid=89328) INFO 11-06 17:48:35 [patch_dyntra_lb_core.py:97]  DP7 | Run(5): [  8,   8,   6,   6,  16]                       | Wait(2): [  5,   9]
+
+
+
+
+
+
+
+
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:88] =====================================================================================
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:89] [dyntra_lb] requests_by_rank (DP Workload Status):
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:97]  DP0 | Run(15): [ 14,  10,  11,   6,  13,  10,  11,   6,   6,   6,   9,   5,   6,   8,  13] | Wait(1): [130]
+(EngineCore_DP1 pid=89329) INFO 11-06 17:49:42 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [15, 0, 0, 0, 0, 0] | blk num [144, 0, 0] | block size [scheduler=128, dyntra_lb=128]
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:97]  DP1 | Run(15): [  9,  16,  12,   9,   8,   9,  10,  13,  11,   8,   8,   6,   7,   9,   9] | Wait(0): []
+(EngineCore_DP5 pid=89333) INFO 11-06 17:49:42 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [14, 3, 3, 0, 0, 0] | blk num [155, 384, 384] | block size [scheduler=128, dyntra_lb=128]
+(EngineCore_DP4 pid=89332) INFO 11-06 17:49:42 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [15, 0, 0, 0, 0, 0] | blk num [170, 0, 0] | block size [scheduler=128, dyntra_lb=128]
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:97]  DP2 | Run(14): [  7,  12,   7,   6,   8,  10,   8,   8,  16,  14,  10,   6,   7,  11] | Wait(0): []
+(EngineCore_DP6 pid=89334) INFO 11-06 17:49:42 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [14, 0, 0, 0, 0, 0] | blk num [152, 0, 0] | block size [scheduler=128, dyntra_lb=128]
+(EngineCore_DP7 pid=89335) INFO 11-06 17:49:42 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [17, 0, 0, 0, 0, 0] | blk num [160, 0, 0] | block size [scheduler=128, dyntra_lb=128]
+(EngineCore_DP2 pid=89330) INFO 11-06 17:49:42 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [14, 2, 0, 2, 0, 0] | blk num [130, 18, 0] | block size [scheduler=128, dyntra_lb=128]
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:97]  DP3 | Run(16): [  7,  13,  15,   8,  11,  11,   6,  10,   9,  11,   7,   9,  11,   6,  14,  10] | Wait(0): []
+(EngineCore_DP3 pid=89331) INFO 11-06 17:49:42 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [16, 0, 0, 0, 0, 0] | blk num [158, 0, 0] | block size [scheduler=128, dyntra_lb=128]
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:97]  DP4 | Run(15): [  9,  11,   9,   6,   9,   7,  11,   8,  16,  16,  17,  13,  11,  10,  17] | Wait(0): []
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:97]  DP5 | Run(14): [ 18,  14,   7,  16,  10,   8,  13,   7,   6,  15,   9,  14,   5,  13] | Wait(3): [127, 132, 125]
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:97]  DP6 | Run(14): [ 11,   7,   7,  12,  14,  10,   8,  15,  18,  11,  18,   7,   8,   6] | Wait(0): []
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:97]  DP7 | Run(17): [ 11,   6,   6,  12,  14,   7,  11,  12,  13,   8,  13,  14,   5,   9,   6,   5,   8] | Wait(0): []
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:98] =====================================================================================
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:105] ============================================================
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:106] [dyntra_lb] modifications:
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:113]  DP0 | Out: []         | In: []          | Freeze: True
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:113]  DP1 | Out: []         | In: []          | Freeze: True
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:113]  DP2 | Out: []         | In: []          | Freeze: True
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:113]  DP3 | Out: []         | In: []          | Freeze: True
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:113]  DP4 | Out: []         | In: []          | Freeze: True
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:113]  DP5 | Out: []         | In: []          | Freeze: True
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:113]  DP6 | Out: []         | In: []          | Freeze: True
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:113]  DP7 | Out: []         | In: []          | Freeze: True
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:114] ============================================================
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [15, 2, 1, 1, 0, 0] | blk num [134, 136, 130] | block size [scheduler=128, dyntra_lb=128]
+(EngineCore_DP4 pid=89332) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:119] _has_global_unfinished_reqs | step_counter: 1671
+(EngineCore_DP7 pid=89335) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:119] _has_global_unfinished_reqs | step_counter: 1671
+(EngineCore_DP1 pid=89329) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:119] _has_global_unfinished_reqs | step_counter: 1671
+(EngineCore_DP3 pid=89331) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:119] _has_global_unfinished_reqs | step_counter: 1671
+(EngineCore_DP6 pid=89334) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:119] _has_global_unfinished_reqs | step_counter: 1671
+(EngineCore_DP5 pid=89333) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:119] _has_global_unfinished_reqs | step_counter: 1671
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:119] _has_global_unfinished_reqs | step_counter: 1671
+(EngineCore_DP2 pid=89330) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:119] _has_global_unfinished_reqs | step_counter: 1671
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:88] =====================================================================================
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:89] [dyntra_lb] requests_by_rank (DP Workload Status):
+(EngineCore_DP5 pid=89333) INFO 11-06 17:49:42 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [14, 3, 3, 0, 0, 0] | blk num [155, 384, 384] | block size [scheduler=128, dyntra_lb=128]
+(EngineCore_DP4 pid=89332) INFO 11-06 17:49:42 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [15, 0, 0, 0, 0, 0] | blk num [170, 0, 0] | block size [scheduler=128, dyntra_lb=128]
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:97]  DP0 | Run(15): [ 14,  10,  11,   6,  13,  10,  11,   6,   6,   6,   9,   5,   6,   8,  13] | Wait(1): [130]
+(EngineCore_DP7 pid=89335) INFO 11-06 17:49:42 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [17, 0, 0, 0, 0, 0] | blk num [160, 0, 0] | block size [scheduler=128, dyntra_lb=128]
+(EngineCore_DP6 pid=89334) INFO 11-06 17:49:42 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [14, 0, 0, 0, 0, 0] | blk num [152, 0, 0] | block size [scheduler=128, dyntra_lb=128]
+(EngineCore_DP3 pid=89331) INFO 11-06 17:49:42 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [16, 0, 0, 0, 0, 0] | blk num [159, 0, 0] | block size [scheduler=128, dyntra_lb=128]
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:97]  DP1 | Run(15): [  9,  16,  12,   9,   8,  10,  10,  13,  11,   8,   8,   6,   7,   9,   9] | Wait(0): []
+(EngineCore_DP1 pid=89329) INFO 11-06 17:49:42 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [15, 0, 0, 0, 0, 0] | blk num [145, 0, 0] | block size [scheduler=128, dyntra_lb=128]
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:97]  DP2 | Run(14): [  7,  12,   7,   6,   8,  10,   8,   8,  16,  14,  10,   6,   7,  11] | Wait(0): []
+(EngineCore_DP2 pid=89330) INFO 11-06 17:49:42 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [14, 2, 0, 2, 0, 0] | blk num [130, 18, 0] | block size [scheduler=128, dyntra_lb=128]
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:97]  DP3 | Run(16): [  7,  13,  15,   8,  11,  11,   6,  10,   9,  11,   7,   9,  11,   6,  15,  10] | Wait(0): []
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:97]  DP4 | Run(15): [  9,  11,   9,   6,   9,   7,  11,   8,  16,  16,  17,  13,  11,  10,  17] | Wait(0): []
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:97]  DP5 | Run(14): [ 18,  14,   7,  16,  10,   8,  13,   7,   6,  15,   9,  14,   5,  13] | Wait(3): [127, 132, 125]
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:97]  DP6 | Run(14): [ 11,   7,   7,  12,  14,  10,   8,  15,  18,  11,  18,   7,   8,   6] | Wait(0): []
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:97]  DP7 | Run(17): [ 11,   6,   6,  12,  14,   7,  11,  12,  13,   8,  13,  14,   5,   9,   6,   5,   8] | Wait(0): []
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:98] =====================================================================================
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:105] ============================================================
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:106] [dyntra_lb] modifications:
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:113]  DP0 | Out: []         | In: []          | Freeze: True
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:113]  DP1 | Out: []         | In: []          | Freeze: True
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:113]  DP2 | Out: []         | In: []          | Freeze: True
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:113]  DP3 | Out: []         | In: []          | Freeze: True
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:113]  DP4 | Out: []         | In: []          | Freeze: True
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:113]  DP5 | Out: []         | In: []          | Freeze: True
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:113]  DP6 | Out: []         | In: []          | Freeze: True
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:113]  DP7 | Out: []         | In: []          | Freeze: True
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:114] ============================================================
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [15, 2, 1, 1, 0, 0] | blk num [134, 136, 130] | block size [scheduler=128, dyntra_lb=128]
+(EngineCore_DP5 pid=89333) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:119] _has_global_unfinished_reqs | step_counter: 1672
+(EngineCore_DP1 pid=89329) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:119] _has_global_unfinished_reqs | step_counter: 1672
+(EngineCore_DP6 pid=89334) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:119] _has_global_unfinished_reqs | step_counter: 1672
+(EngineCore_DP3 pid=89331) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:119] _has_global_unfinished_reqs | step_counter: 1672
+(EngineCore_DP7 pid=89335) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:119] _has_global_unfinished_reqs | step_counter: 1672
+(EngineCore_DP4 pid=89332) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:119] _has_global_unfinished_reqs | step_counter: 1672
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:119] _has_global_unfinished_reqs | step_counter: 1672
+(EngineCore_DP2 pid=89330) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:119] _has_global_unfinished_reqs | step_counter: 1672
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:88] =====================================================================================
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:89] [dyntra_lb] requests_by_rank (DP Workload Status):
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:97]  DP0 | Run(15): [ 14,  10,  11,   6,  13,  10,  11,   6,   6,   6,   9,   5,   6,   8,  13] | Wait(2): [130,   6]
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:97]  DP1 | Run(15): [  9,  16,  12,   9,   8,  10,  10,  13,  11,   8,   8,   6,   7,   9,   9] | Wait(0): []
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:97]  DP2 | Run(14): [  7,  12,   7,   6,   8,  10,   8,   8,  16,  14,  10,   6,   7,  11] | Wait(2): [ 10,   8]
+(EngineCore_DP1 pid=89329) INFO 11-06 17:49:42 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [15, 0, 0, 0, 0, 0] | blk num [145, 0, 0] | block size [scheduler=128, dyntra_lb=128]
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:97]  DP3 | Run(16): [  7,  13,  15,   8,  11,  11,   6,  10,   9,  11,   7,   9,  11,   6,  15,  10] | Wait(0): []
+(EngineCore_DP7 pid=89335) INFO 11-06 17:49:42 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [17, 0, 0, 0, 0, 0] | blk num [160, 0, 0] | block size [scheduler=128, dyntra_lb=128]
+(EngineCore_DP6 pid=89334) INFO 11-06 17:49:42 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [14, 0, 0, 0, 0, 0] | blk num [152, 0, 0] | block size [scheduler=128, dyntra_lb=128]
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:97]  DP4 | Run(15): [  9,  11,   9,   6,   9,   7,  11,   8,  16,  16,  17,  13,  11,  10,  17] | Wait(0): []
+(EngineCore_DP5 pid=89333) INFO 11-06 17:49:42 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [15, 2, 2, 0, 0, 0] | blk num [280, 259, 259] | block size [scheduler=128, dyntra_lb=128]
+(EngineCore_DP4 pid=89332) INFO 11-06 17:49:42 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [15, 0, 0, 0, 0, 0] | blk num [170, 0, 0] | block size [scheduler=128, dyntra_lb=128]
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:97]  DP5 | Run(14): [ 18,  14,   7,  16,  10,   8,  13,   7,   6,  15,   9,  14,   5,  13] | Wait(3): [127, 132, 125]
+(EngineCore_DP3 pid=89331) INFO 11-06 17:49:42 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [16, 0, 0, 0, 0, 0] | blk num [159, 0, 0] | block size [scheduler=128, dyntra_lb=128]
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:97]  DP6 | Run(14): [ 11,   7,   7,  12,  14,  10,   8,  15,  18,  11,  18,   7,   8,   6] | Wait(0): []
+(EngineCore_DP2 pid=89330) INFO 11-06 17:49:42 [dyntra_lb_scheduler.py:96] schedule() | scheduler req num: [16, 0, 0, 0, 0, 0] | blk num [148, 0, 0] | block size [scheduler=128, dyntra_lb=128]
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:97]  DP7 | Run(17): [ 11,   6,   6,  12,  14,   7,  11,  12,  13,   8,  13,  14,   5,   9,   6,   5,   8] | Wait(0): []
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:98] =====================================================================================
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:105] ============================================================
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:106] [dyntra_lb] modifications:
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:113]  DP0 | Out: []         | In: [130,   6]  | Freeze: False
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:113]  DP1 | Out: []         | In: []          | Freeze: True
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:113]  DP2 | Out: []         | In: [ 10,   8]  | Freeze: False
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:113]  DP3 | Out: []         | In: []          | Freeze: True
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:113]  DP4 | Out: []         | In: []          | Freeze: True
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:113]  DP5 | Out: []         | In: [125]       | Freeze: False
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:113]  DP6 | Out: []         | In: []          | Freeze: True
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:113]  DP7 | Out: []         | In: []          | Freeze: True
+(EngineCore_DP0 pid=89328) INFO 11-06 17:49:42 [patch_dyntra_lb_core.py:114] ============================================================
