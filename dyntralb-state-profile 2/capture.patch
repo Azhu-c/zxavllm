@@ -1,11 +1,11 @@
 --- a/vllm_ascend/core/dyntra_lb_scheduler.py
 +++ b/vllm_ascend/core/dyntra_lb_scheduler.py
-@@ -1304,6 +1304,12 @@
+@@ -1239,6 +1239,12 @@
              print_scheduler_summary(self, scheduler_output)
          return scheduler_output
  
 +
-+# Opt-in observational instrumentation; no change when DYNTRA_DATA_DIR is unset.
++# Optional dataset capture; activated only when the capture directory is set.
 +import os as _capture_os
 +if _capture_os.environ.get("DYNTRA_DATA_DIR"):
 +    from dyntra_capture import install as _install_capture

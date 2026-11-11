@@ -17,18 +17,18 @@ automatic_benchmark_profile.sh
 
 ## 一、上传工具，不覆盖原脚本
 
-将 `dyntralb-state-profile.tar.gz` 上传到服务器现有的 DyntraLB `scripts/` 目录。在该目录解压：
+将 `dyntralb-state-profile-server.tar.gz` 上传到服务器现有的 DyntraLB `scripts/` 目录。在该目录解压：
 
 ```bash
 cd /实际路径/你的DyntraLB/scripts
-tar -tzf dyntralb-state-profile.tar.gz | head
+tar -tzf dyntralb-state-profile-server.tar.gz | head
 ```
 
-确认目录 `dyntralb-state-profile` 尚不存在后解压：
+确认目录 `dyntralb-state-profile-server` 尚不存在后解压：
 
 ```bash
-tar -xzf dyntralb-state-profile.tar.gz
-export CAPTURE_HOME="$PWD/dyntralb-state-profile"
+tar -xzf dyntralb-state-profile-server.tar.gz
+export CAPTURE_HOME="$PWD/dyntralb-state-profile-server"
 ```
 
 保留你现有的 `run_proxy_server.sh`、Prefill 脚本、`run_vllm_serve_8p8d_asyncSched_d_dynam.sh` 和 `benchmark_eta_history.py`；它们仍放在 `scripts/`。本工具不会覆盖这些文件。使用时工作目录保持为 `scripts/`，自动脚本依然按原来的相对路径查找它们。
@@ -52,15 +52,10 @@ sha256sum "$REPO/vllm_ascend/core/dyntra_lb_scheduler.py"
 
 实际路径不同就替换 `REPO`。确认 Decode 启动脚本没有切换环境或改变代码路径，否则这条命令看到的文件不一定是服务实际加载的文件。
 
-目前补丁仅按本地现有代码包准备，适用的 `dyntra_lb_scheduler.py` SHA-256 是：
+本补丁依据你提供的服务器调度器代码生成；核对哈希后确认适用的 `dyntra_lb_scheduler.py` SHA-256 是：
 
 ```text
-98d6d5e33dd98477417d1cd293195cb4a7a6a50ea034dd5b3a4f6b420e60cf28
-
-# export REPO=/workspace/dyntralb
-sha256sum "$REPO/vllm_ascend/core/dyntra_lb_scheduler.py"
-1b6c9997e1009b6887fad20e9cdabc4bc0ecafd36e998a2950bb7e8d5dfbe445  /workspace/dyntralb/vllm_ascend/core/dyntra_lb_scheduler.py
-
+1b6c9997e1009b6887fad20e9cdabc4bc0ecafd36e998a2950bb7e8d5dfbe445
 ```
 
 **哈希不一致时不要打补丁。** 请将真实文件路径、哈希和文件内容提供给我，以便按你的服务器版本适配。哈希一致后，确认没有运行中的服务正在使用该文件，推荐在实验用源码副本执行：
@@ -87,7 +82,7 @@ fi
 
 ```bash
 cd /实际路径/你的DyntraLB/scripts
-export CAPTURE_HOME="$PWD/dyntralb-state-profile"
+export CAPTURE_HOME="$PWD/dyntralb-state-profile-server"
 PROFILE_ENABLE=0 STATE_CAPTURE_ENABLE=1 \
   bash "$CAPTURE_HOME/automatic_benchmark_profile.sh" \
   --modes dynam --rounds 1 --num-prompts 100 \
