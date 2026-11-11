@@ -1,3 +1,13 @@
+# grep -nE '调度状态采集目录|Dyntra capture|Traceback|Error|error' log/decoder_lb.log | tail -80
+1:调度状态采集目录: /workspace/ycp/vllm_serve_run/state_dataset/run-7dA11EDV
+[root@node09 vllm_serve_run]# find ./state_dataset ./dyntralb-state-profile-server/results \
+  -type f \( -name '*.jsonl' -o -name '*.json' \) 2>/dev/null | head -80
+./dyntralb-state-profile-server/results/20261111_1058_dyntralb_quick_500_lb_round1.json
+./dyntralb-state-profile-server/results/20261111_1049_dyntralb_quick_500_lb_round1.json
+
+
+
+
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
 
