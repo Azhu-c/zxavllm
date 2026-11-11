@@ -56,6 +56,11 @@ sha256sum "$REPO/vllm_ascend/core/dyntra_lb_scheduler.py"
 
 ```text
 98d6d5e33dd98477417d1cd293195cb4a7a6a50ea034dd5b3a4f6b420e60cf28
+
+# export REPO=/workspace/dyntralb
+sha256sum "$REPO/vllm_ascend/core/dyntra_lb_scheduler.py"
+1b6c9997e1009b6887fad20e9cdabc4bc0ecafd36e998a2950bb7e8d5dfbe445  /workspace/dyntralb/vllm_ascend/core/dyntra_lb_scheduler.py
+
 ```
 
 **哈希不一致时不要打补丁。** 请将真实文件路径、哈希和文件内容提供给我，以便按你的服务器版本适配。哈希一致后，确认没有运行中的服务正在使用该文件，推荐在实验用源码副本执行：
