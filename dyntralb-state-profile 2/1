@@ -1,3 +1,39 @@
+{
+  "rows": 6449,
+  "files": 8,
+  "valid_transitions_train": 4503,
+  "valid_transitions_test": 1930,
+  "scheduled_requests_histogram": {
+    "0": 138,
+    "1": 776,
+    "2": 389,
+    "3": 391,
+    "4": 167,
+    "5": 107,
+    "6": 124,
+    "7": 107,
+    "8": 98,
+    "9": 118,
+    "10": 124,
+    "11": 123,
+    "12": 93,
+    "13": 105,
+    "14": 289,
+    "15": 1320,
+    "16": 1075,
+    "17": 708,
+    "18": 197
+  },
+  "parse_errors": [],
+  "target": "next pre-schedule running_blocks; not a reward",
+  "warning": "Observational association only; actions are policy-selected; not an offline policy evaluation.",
+  "test_mae_train_mean": 90.59119343580673,
+  "test_mae_state": 7.0196269765380235,
+  "test_mae_state_action": 0.8931727088321727
+}
+
+
+
 # grep -nE '调度状态采集目录|Dyntra capture|Traceback|Error|error' log/decoder_lb.log | tail -80
 1:调度状态采集目录: /workspace/ycp/vllm_serve_run/state_dataset/run-7dA11EDV
 [root@node09 vllm_serve_run]# find ./state_dataset ./dyntralb-state-profile-server/results \
