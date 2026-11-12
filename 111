@@ -1,3 +1,112 @@
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923] WorkerProc failed to start.
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923] Traceback (most recent call last):
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/v1/executor/multiproc_executor.py", line 890, in worker_main
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]     worker = WorkerProc(*args, **kwargs)
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]     return func(*args, **kwargs)
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/v1/executor/multiproc_executor.py", line 651, in __init__
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]     self.worker.init_device()
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/v1/worker/worker_base.py", line 331, in init_device
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]     self.worker.init_device()  # type: ignore
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]     ^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm-ascend/vllm_ascend/worker/worker.py", line 460, in init_device
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]     self.device = self._init_device()
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]                   ^^^^^^^^^^^^^^^^^^^
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm-ascend/vllm_ascend/worker/worker.py", line 448, in _init_device
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]     self._init_worker_distributed_environment()
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm-ascend/vllm_ascend/worker/worker.py", line 1051, in _init_worker_distributed_environment
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]     init_distributed_environment(
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/distributed/parallel_state.py", line 1677, in init_distributed_environment
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]     torch.distributed.init_process_group(
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]   File "/usr/local/python3.11.10/lib/python3.11/site-packages/torch/distributed/c10d_logger.py", line 83, in wrapper
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]     return func(*args, **kwargs)
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]   File "/usr/local/python3.11.10/lib/python3.11/site-packages/torch/distributed/c10d_logger.py", line 97, in wrapper
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]     func_return = func(*args, **kwargs)
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]                   ^^^^^^^^^^^^^^^^^^^^^
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]   File "/usr/local/python3.11.10/lib/python3.11/site-packages/torch/distributed/distributed_c10d.py", line 1806, in init_process_group
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]     store, rank, world_size = next(rendezvous_iterator)
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]                               ^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]   File "/usr/local/python3.11.10/lib/python3.11/site-packages/torch/distributed/rendezvous.py", line 233, in _tcp_rendezvous_handler
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]     store = _create_c10d_store(
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]             ^^^^^^^^^^^^^^^^^^^
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]   File "/usr/local/python3.11.10/lib/python3.11/site-packages/torch/distributed/rendezvous.py", line 200, in _create_c10d_store
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]     return TCPStore(
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923]            ^^^^^^^^^
+(Worker pid=13953) ERROR 11-12 19:36:52 [multiproc_executor.py:923] torch.distributed.DistNetworkError: The server socket has failed to listen on any local network address. port: 36747, useIpv6: false, code: -98, name: EADDRINUSE, message: address already in use
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343] EngineCore failed to start.
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343] Traceback (most recent call last):
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/v1/engine/core.py", line 1306, in run_engine_core
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]     engine_core = DPEngineCoreProc(*args, **kwargs)
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/v1/engine/core.py", line 1952, in __init__
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]     super().__init__(
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]     return func(*args, **kwargs)
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/v1/engine/core.py", line 1070, in __init__
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]     super().__init__(
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/v1/engine/core.py", line 132, in __init__
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]     self.model_executor = executor_class(vllm_config)
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/v1/executor/multiproc_executor.py", line 113, in __init__
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]     super().__init__(vllm_config)
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]     return func(*args, **kwargs)
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/v1/executor/abstract.py", line 109, in __init__
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]     self._init_executor()
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/v1/executor/multiproc_executor.py", line 206, in _init_executor
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]     self.workers = WorkerProc.wait_for_ready(unready_workers)
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/v1/executor/multiproc_executor.py", line 787, in wait_for_ready
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343]     raise e from None
+(EngineCore_DP0 pid=12415) ERROR 11-12 19:36:57 [core.py:1343] Exception: WorkerProc initialization failed due to an exception in a background process. See stack trace for root cause.
+(EngineCore_DP0 pid=12415) Process EngineCore_DP0:
+(EngineCore_DP0 pid=12415) Traceback (most recent call last):
+(EngineCore_DP0 pid=12415)   File "/usr/local/python3.11.10/lib/python3.11/multiprocessing/process.py", line 314, in _bootstrap
+(EngineCore_DP0 pid=12415)     self.run()
+(EngineCore_DP0 pid=12415)   File "/usr/local/python3.11.10/lib/python3.11/multiprocessing/process.py", line 108, in run
+(EngineCore_DP0 pid=12415)     self._target(*self._args, **self._kwargs)
+(EngineCore_DP0 pid=12415)   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm-ascend/vllm_ascend/patch/platform/patch_dyntra_lb_core.py", line 532, in _dyntra_lb_run_engine_core
+(EngineCore_DP0 pid=12415)     return _PreviousRunEngineCore(*args, dp_rank=dp_rank, local_dp_rank=local_dp_rank, **kwargs)
+(EngineCore_DP0 pid=12415)            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore_DP0 pid=12415)   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm-ascend/vllm_ascend/patch/platform/patch_balance_schedule.py", line 909, in _balance_run_engine_core
+(EngineCore_DP0 pid=12415)     return _OriginalRunEngineCore(*args, dp_rank=dp_rank, local_dp_rank=local_dp_rank, **kwargs)
+(EngineCore_DP0 pid=12415)            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore_DP0 pid=12415)   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/v1/engine/core.py", line 1347, in run_engine_core
+(EngineCore_DP0 pid=12415)     raise e
+(EngineCore_DP0 pid=12415)   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/v1/engine/core.py", line 1306, in run_engine_core
+(EngineCore_DP0 pid=12415)     engine_core = DPEngineCoreProc(*args, **kwargs)
+(EngineCore_DP0 pid=12415)                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore_DP0 pid=12415)   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/v1/engine/core.py", line 1952, in __init__
+(EngineCore_DP0 pid=12415)     super().__init__(
+(EngineCore_DP0 pid=12415)   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore_DP0 pid=12415)     return func(*args, **kwargs)
+(EngineCore_DP0 pid=12415)            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore_DP0 pid=12415)   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/v1/engine/core.py", line 1070, in __init__
+(EngineCore_DP0 pid=12415)     super().__init__(
+(EngineCore_DP0 pid=12415)   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/v1/engine/core.py", line 132, in __init__
+(EngineCore_DP0 pid=12415)     self.model_executor = executor_class(vllm_config)
+(EngineCore_DP0 pid=12415)                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore_DP0 pid=12415)   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/v1/executor/multiproc_executor.py", line 113, in __init__
+(EngineCore_DP0 pid=12415)     super().__init__(vllm_config)
+(EngineCore_DP0 pid=12415)   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore_DP0 pid=12415)     return func(*args, **kwargs)
+(EngineCore_DP0 pid=12415)            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore_DP0 pid=12415)   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/v1/executor/abstract.py", line 109, in __init__
+(EngineCore_DP0 pid=12415)     self._init_executor()
+(EngineCore_DP0 pid=12415)   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/v1/executor/multiproc_executor.py", line 206, in _init_executor
+(EngineCore_DP0 pid=12415)     self.workers = WorkerProc.wait_for_ready(unready_workers)
+(EngineCore_DP0 pid=12415)                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore_DP0 pid=12415)   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/v1/executor/multiproc_executor.py", line 787, in wait_for_ready
+(EngineCore_DP0 pid=12415)     raise e from None
+(EngineCore_DP0 pid=12415) Exception: WorkerProc initialization failed due to an exception in a background process. See stack trace for root cause.
+
+
+
 (APIServer pid=11559) Traceback (most recent call last):
 (APIServer pid=11559)   File "/usr/local/python3.11.10/bin/vllm", line 8, in <module>
 (APIServer pid=11559)     sys.exit(main())
