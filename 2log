@@ -54,3 +54,27 @@ Interpretation:
   Compare ascend_root with the --ascend-root used at installation.
   /proc/environ records startup settings; later in-process changes may differ.
   Package lookup checks disk resolution in a fresh interpreter, not the running API object's class.
+
+
+
+
+
+
+uting.py:147] [kv_blocks_step] wave=0 step=1204 DP0 | Run(14): [16, 7, 9, 8, 9, 13, 8, 7, 14, 16, 6, 6, 14, 7] | Wait(1): [8] | total=148 block_size=128
+(EngineCore_DP6 pid=394447) INFO 11-13 12:48:46 [patch_kv_blocks_routing.py:147] [kv_blocks_step] wave=0 step=1204 DP6 | Run(12): [7, 12, 8, 16, 7, 13, 10, 13, 12, 11, 7, 6] | Wait(2): [10, 7] | total=139 block_size=128
+(EngineCore_DP4 pid=394445) INFO 11-13 12:48:46 [patch_kv_blocks_routing.py:147] [kv_blocks_step] wave=0 step=1204 DP4 | Run(14): [14, 9, 8, 12, 15, 8, 12, 9, 7, 9, 7, 10, 12, 6] | Wait(1): [11] | total=149 block_size=128
+(EngineCore_DP3 pid=394444) INFO 11-13 12:48:46 [patch_kv_blocks_routing.py:147] [kv_blocks_step] wave=0 step=1204 DP3 | Run(14): [17, 10, 7, 14, 8, 7, 6, 11, 12, 12, 6, 10, 8, 7] | Wait(1): [6] | total=141 block_size=128
+(EngineCore_DP1 pid=394442) INFO 11-13 12:48:46 [patch_kv_blocks_routing.py:147] [kv_blocks_step] wave=0 step=1204 DP1 | Run(15): [7, 9, 10, 12, 8, 7, 6, 8, 8, 9, 12, 7, 16, 13, 9] | Wait(0): [] | total=141 block_size=128
+(EngineCore_DP7 pid=394448) INFO 11-13 12:48:46 [patch_kv_blocks_routing.py:147] [kv_blocks_step] wave=0 step=1204 DP7 | Run(17): [8, 9, 13, 12, 9, 13, 9, 5, 11, 12, 9, 5, 7, 9, 5, 6, 8] | Wait(0): [] | total=150 block_size=128
+WARNING 11-13 12:48:46 [coordinator.py:404] Received stats for out-of-order step (0, 1203) from engine 0 (expected > (0, 1204))
+(EngineCore_DP2 pid=394443) INFO 11-13 12:48:46 [patch_kv_blocks_routing.py:147] [kv_blocks_step] wave=0 step=1204 DP2 | Run(14): [10, 12, 9, 8, 7, 9, 17, 8, 11, 11, 6, 5, 9, 16] | Wait(1): [10] | total=148 block_size=128
+(EngineCore_DP5 pid=394446) INFO 11-13 12:48:46 [patch_kv_blocks_routing.py:147] [kv_blocks_step] wave=0 step=1204 DP5 | Run(13): [7, 7, 15, 17, 7, 10, 11, 15, 7, 5, 6, 8, 15] | Wait(1): [17] | total=147 block_size=128
+(APIServer pid=393587) INFO 11-13 12:48:46 [patch_kv_blocks_routing.py:103] [kv_blocks_route] seq=635 totals=[148, 141, 148, 141, 149, 147, 139, 150] selected=DP6 pinned=False
+(APIServer pid=393587) INFO 11-13 12:48:46 [patch_kv_blocks_routing.py:147] [kv_blocks_route] seq=635 DP0 | Run(14): [16, 7, 9, 8, 9, 13, 8, 7, 14, 16, 6, 6, 14, 7] | Wait(1): [8] | total=148 block_size=128
+(APIServer pid=393587) INFO 11-13 12:48:46 [patch_kv_blocks_routing.py:147] [kv_blocks_route] seq=635 DP1 | Run(15): [7, 9, 10, 12, 8, 7, 6, 8, 8, 9, 12, 7, 16, 13, 9] | Wait(0): [] | total=141 block_size=128
+(APIServer pid=393587) INFO 11-13 12:48:46 [patch_kv_blocks_routing.py:147] [kv_blocks_route] seq=635 DP2 | Run(14): [10, 12, 9, 8, 7, 9, 17, 8, 11, 11, 6, 5, 9, 16] | Wait(1): [10] | total=148 block_size=128
+(APIServer pid=393587) INFO 11-13 12:48:46 [patch_kv_blocks_routing.py:147] [kv_blocks_route] seq=635 DP3 | Run(14): [17, 10, 7, 14, 8, 7, 6, 11, 12, 12, 6, 10, 8, 7] | Wait(1): [6] | total=141 block_size=128
+(APIServer pid=393587) INFO 11-13 12:48:46 [patch_kv_blocks_routing.py:147] [kv_blocks_route] seq=635 DP4 | Run(14): [14, 9, 8, 12, 15, 8, 12, 9, 7, 9, 7, 10, 12, 6] | Wait(1): [11] | total=149 block_size=128
+(APIServer pid=393587) INFO 11-13 12:48:46 [patch_kv_blocks_routing.py:147] [kv_blocks_route] seq=635 DP5 | Run(13): [7, 7, 15, 17, 7, 10, 11, 15, 7, 5, 6, 8, 15] | Wait(1): [17] | total=147 block_size=128
+(APIServer pid=393587) INFO 11-13 12:48:46 [patch_kv_blocks_routing.py:147] [kv_blocks_route] seq=635 DP6 | Run(12): [7, 12, 8, 16, 7, 13, 10, 13, 12, 11, 7, 6] | Wait(2): [10, 7] | total=139 block_size=128
+(APIServer pid=393587) INFO 11-13 12:48:46 [patch_kv_blocks_routing.py:147] [kv_blocks_route] seq=635 DP7 | Run(17): [8, 9, 13, 12, 9, 13, 9, 5, 11, 12, 9, 5, 7, 9, 5, 6, 8] | Wait(0): [] | total=150 block_size=128
