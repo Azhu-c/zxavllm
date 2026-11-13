@@ -5,3 +5,52 @@ WARNING 11-13 12:14:22 [coordinator.py:404] Received stats for out-of-order step
 WARNING 11-13 12:14:22 [coordinator.py:404] Received stats for out-of-order step (0, 1811) from engine 2 (expected > (0, 1812))
 WARNING 11-13 12:14:22 [coordinator.py:404] Received stats for out-of-order step (0, 1815) from engine 5 (expected > (0, 1816))
 WARNING 11-13 12:14:22 [coordinator.py:404] Received stats for out-of-order step (0, 1818) from engine 1 (expected > (0, 1819))
+
+
+
+
+API PID: 378538
+Python executable: /usr/local/python3.11.10/bin/python3.11
+Python command used for lookup: /usr/local/python3.11.10/bin/python3.11
+Working directory: /workspace/ycp/vllm_serve_run
+
+Settings recorded when this process started:
+  VLLM_ASCEND_KV_BLOCKS_ROUTING=1
+  VLLM_ASCEND_KV_BLOCKS_LOG=1
+  VLLM_ASCEND_KV_BLOCKS_STEP_LOG=1
+  VLLM_ASCEND_KV_BLOCKS_TIMEOUT_S=30
+  VLLM_LOGGING_LEVEL=WARNING
+  VLLM_CONFIGURE_LOGGING=<unset; default '1'>
+  VLLM_LOGGING_CONFIG_PATH=<unset; default ''>
+  VLLM_LOGGING_STREAM=<unset; default 'ext://sys.stdout'>
+
+Package lookup using that executable, environment and working directory (no package imports):
+{
+  "vllm": "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/__init__.py",
+  "vllm_ascend": "/workspace/dyntralb/vllm_ascend/__init__.py",
+  "ascend_root": "/workspace/dyntralb",
+  "ascend_source_checks": {
+    "platform.py": {
+      "exists": true,
+      "marker_present": true
+    },
+    "patch/platform/__init__.py": {
+      "exists": true,
+      "marker_present": true
+    },
+    "core/kv_blocks_routing.py": {
+      "exists": true,
+      "marker_present": true
+    },
+    "patch/platform/patch_kv_blocks_routing.py": {
+      "exists": true,
+      "marker_present": true
+    }
+  }
+}
+
+Interpretation:
+  The vLLM log-level setting filters out INFO-level route and step arrays.
+  Compare ascend_root with the --ascend-root used at installation.
+  /proc/environ records startup settings; later in-process changes may differ.
+  Package lookup checks disk resolution in a fresh interpreter, not the running API object's class.
