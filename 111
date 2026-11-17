@@ -1,3 +1,13 @@
+run	wave	step	DP0_total	DP1_total	DP2_total	DP3_total	DP4_total	DP5_total	DP6_total	DP7_total	dispatch_count	dispatches	association_methods	complete	changed_rank_states	load_avg	imbalance_l1_normalized	imbalance_cv	imbalance_max_avg_excess	imbalance_l1	max-min		max-avg	max-avg
+
+1	0	149	145	148	145	147	149	144	147	176	1	seq=125->DP5	context_all_ranks_same_step	1		150.125	0.04308909	0.06597847	0.17235637	51.75	27		25.875	25.875
+1	0	150	146	148	145	147	149	274	148	176	1	seq=126->DP2	context_all_ranks_same_step	1		166.625	0.17516879	0.2501614	0.6444111	233.5	27		107.375	107.375
+
+1	0	159	156	158	162	277	168	274	153	176	1	seq=135->DP6	context_all_ranks_same_step	1		190.5	0.22309711	0.26006777	0.45406824	340	15		86.5	86.5
+1	0	160	156	158	162	277	168	144	163	176	1	seq=136->DP5	context_all_ranks_same_step	1		175.5	0.14529915	0.22411351	0.57834758	204	15		101.5	101.5
+
+
+
 +------------------------------------------------------------------------------------------------+
 | npu-smi 25.5.1                   Version: 25.5.1                                               |
 +---------------------------+---------------+----------------------------------------------------+
