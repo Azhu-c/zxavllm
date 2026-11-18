@@ -1,3 +1,39 @@
+INFO 11-18 12:06:34 [__init__.py:52] Available plugins for group vllm.platform_plugins:
+INFO 11-18 12:06:34 [__init__.py:54] - ascend -> vllm_ascend:register
+INFO 11-18 12:06:34 [__init__.py:57] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+INFO 11-18 12:06:34 [__init__.py:237] Platform plugin ascend is activated
+INFO 11-18 12:06:34 [platform.py:62] Breakable cudagraph is force disabled on Ascend because DeepSeek V4 PIECEWISE cudagraph is not supported yet.
+INFO 11-18 12:06:41 [__init__.py:112] Registered model loader `<class 'vllm_ascend.model_loader.netloader.netloader.ModelNetLoaderElastic'>` with load format `netloader`
+INFO 11-18 12:06:41 [__init__.py:112] Registered model loader `<class 'vllm_ascend.model_loader.rfork.rfork_loader.RForkModelLoader'>` with load format `rfork`
+usage: vllm serve [model_tag] [options]
+vllm serve: error: argument --additional-config: Value {"enable_cpu_binding":true,
+  "ascend_scheduler_config": {"enabled": false},
+  "scheduler_config": {
+    "kv_blocks_headroom": {
+      "reserve_fraction": 0.05,
+      "growth_tokens": 16,
+      "report_interval_ms": 100
+    },
+    "dyntra_lb_config": {
+      "enabled": true,
+      "enable_diagnostics": true,
+      "mode": "static",
+      "start_step": 0,
+      "end_step": -1,
+      "min_throughput_gain": 0.02,
+      "min_balance_gain": 0.10,
+      "max_balance_throughput_loss": 0.005,
+      "step_latency_per_seq_us": 0.0,
+      "pause_resume_cost_us": 0.0,
+      "gain_horizon_steps": 4
+      "bubble_threshold": 5,
+      "balance_interval": 1
+    }
+  }
+  } cannot be converted to <function loads at 0xffffb1c999e0>.
+
+
+
 fatal: not a git repository (or any parent up to mount point /)
 Stopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).
 fatal: not a git repository (or any parent up to mount point /)
