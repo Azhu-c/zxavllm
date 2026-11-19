@@ -1,3 +1,7 @@
+# bash automatic_mtp_pd_test.sh
+ERROR: worktree must be clean before automatic HEAD switching: /home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm
+
+
 ]# ls -ld "$VLLM_ROOT/.git"
 ls -ld "$ASCEND_ROOT/.git"
 
