@@ -1,3 +1,76 @@
+(APIServer pid=656912) INFO 11-19 11:15:56 [vllm.py:1169] Disabling NCCL for DP synchronization when using async scheduling.
+(APIServer pid=656912) INFO 11-19 11:15:56 [kernel.py:306] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+(APIServer pid=656912) INFO 11-19 11:15:56 [utils.py:181] No quantization signature detected from model files for "/home/y00906461/models/Qwen3-30B-A3B-Instruct-2507". The model will be loaded as float. To force a quantization method, pass "--quantization <method>" explicitly.
+(APIServer pid=656912) WARNING 11-19 11:15:56 [platform.py:552] GPU-specific parameter is not supported on Ascend. parameter=disable_cascade_attn, value=True, action: resetting to False.
+(APIServer pid=656912) Traceback (most recent call last):
+(APIServer pid=656912)   File "/usr/local/python3.11.10/bin/vllm", line 8, in <module>
+(APIServer pid=656912)     sys.exit(main())
+(APIServer pid=656912)              ^^^^^^
+(APIServer pid=656912)   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/entrypoints/cli/main.py", line 97, in main
+(APIServer pid=656912)     args.dispatch_function(args)
+(APIServer pid=656912)   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/entrypoints/cli/serve.py", line 152, in cmd
+(APIServer pid=656912)     uvloop.run(run_server(args))
+(APIServer pid=656912)   File "/usr/local/python3.11.10/lib/python3.11/site-packages/uvloop/__init__.py", line 92, in run
+(APIServer pid=656912)     return runner.run(wrapper())
+(APIServer pid=656912)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=656912)   File "/usr/local/python3.11.10/lib/python3.11/asyncio/runners.py", line 118, in run
+(APIServer pid=656912)     return self._loop.run_until_complete(task)
+(APIServer pid=656912)            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=656912)   File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+(APIServer pid=656912)   File "/usr/local/python3.11.10/lib/python3.11/site-packages/uvloop/__init__.py", line 48, in wrapper
+(APIServer pid=656912)     return await main
+(APIServer pid=656912)            ^^^^^^^^^^
+(APIServer pid=656912)   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/entrypoints/openai/api_server.py", line 764, in run_server
+(APIServer pid=656912)     await run_server_worker(listen_address, sock, args, **uvicorn_kwargs)
+(APIServer pid=656912)   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/entrypoints/openai/api_server.py", line 778, in run_server_worker
+(APIServer pid=656912)     async with build_async_engine_client(
+(APIServer pid=656912)   File "/usr/local/python3.11.10/lib/python3.11/contextlib.py", line 210, in __aenter__
+(APIServer pid=656912)     return await anext(self.gen)
+(APIServer pid=656912)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=656912)   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/entrypoints/openai/api_server.py", line 132, in build_async_engine_client
+(APIServer pid=656912)     async with build_async_engine_client_from_engine_args(
+(APIServer pid=656912)   File "/usr/local/python3.11.10/lib/python3.11/contextlib.py", line 210, in __aenter__
+(APIServer pid=656912)     return await anext(self.gen)
+(APIServer pid=656912)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=656912)   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/entrypoints/openai/api_server.py", line 156, in build_async_engine_client_from_engine_args
+(APIServer pid=656912)     vllm_config = engine_args.create_engine_config(usage_context=usage_context)
+(APIServer pid=656912)                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=656912)   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/engine/arg_utils.py", line 2496, in create_engine_config
+(APIServer pid=656912)     config = VllmConfig(
+(APIServer pid=656912)              ^^^^^^^^^^^
+(APIServer pid=656912)   File "/usr/local/python3.11.10/lib/python3.11/site-packages/pydantic/_internal/_dataclasses.py", line 121, in __init__
+(APIServer pid=656912)     s.__pydantic_validator__.validate_python(ArgsKwargs(args, kwargs), self_instance=s)
+(APIServer pid=656912) pydantic_core._pydantic_core.ValidationError: 1 validation error for VllmConfig
+(APIServer pid=656912)   Value error, KV transfer 'decode' config has a conflicting data parallel size. Expected 8, but got 4. [type=value_error, input_value=ArgsKwargs((), {'model_co... 'shutdown_timeout': 0}), input_type=ArgsKwargs]
+(APIServer pid=656912)     For further information visit https://errors.pydantic.dev/2.13/v/value_error
+(APIServer pid=656912) [ERROR] 2026-11-19-11:15:56 (PID:656912, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception
+corrupted size vs. prev_size
+./run_vllm_serve_8p8d_asyncSched_d_bl_new.sh: line 91: 656912 Aborted                 (core dumped) vllm serve "$MODEL_PATH" --host 61.28.30.29 --port 13701 --api-server-count 1 --tensor-parallel-size 1 --data-parallel-size 8 --data-parallel-size-local 8 --data-parallel-address 61.28.30.29 --data-parallel-rpc-port 12777 --max-num-seqs 64 --block-size 128 --enable-expert-parallel --seed 1024 --served-model-name "$SERVED_MODEL_NAME" --max-model-len 36848 --max-num-batched-tokens 36848 --trust-remote-code "${QUANTIZATION_ARGS[@]}" --compilation-config '{"cudagraph_mode":"FULL_DECODE_ONLY","max_cudagraph_capture_size":20,"cudagraph_capture_sizes":[1,2,4,8,12,16,20]}' --no-enable-prefix-caching --gpu-memory-utilization 0.9 --additional-config '{"enable_cpu_binding":true,
+  "ascend_scheduler_config": {"enabled": false},
+  "scheduler_config": {
+    "dyntra_lb_config": {
+      "enabled": false,
+      "enable_diagnostics": false
+    }
+  }
+  }' --kv-transfer-config '{"kv_connector": "MooncakeConnectorV1",
+  "kv_role": "kv_consumer",
+  "kv_port": "30100",
+  "engine_id": "1",
+  "kv_connector_extra_config": {
+            "prefill": {
+                    "dp_size": 2,
+                    "tp_size": 4
+             },
+             "decode": {
+                    "dp_size": 4,
+                    "tp_size": 1
+             }
+      }
+  }'
+
+
+
 INFO 11-18 12:06:34 [__init__.py:52] Available plugins for group vllm.platform_plugins:
 INFO 11-18 12:06:34 [__init__.py:54] - ascend -> vllm_ascend:register
 INFO 11-18 12:06:34 [__init__.py:57] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
