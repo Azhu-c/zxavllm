@@ -1,6 +1,15 @@
 git -C "/workspace/ycp/vllm" rev-parse --git-dir
 
 git -C "/workspace/ycp/vllm-ascend" rev-parse --git-dir
+fatal: detected dubious ownership in repository at '/workspace/ycp/vllm'
+To add an exception for this directory, call:
+
+	git config --global --add safe.directory /workspace/ycp/vllm
+fatal: detected dubious ownership in repository at '/workspace/ycp/vllm-ascend'
+To add an exception for this directory, call:
+
+	git config --global --add safe.directory /workspace/ycp/vllm-ascend
+
 
 (Worker_TP1 pid=101844) ERROR 11-19 15:32:13 [multiproc_executor.py:1029] WorkerProc hit an exception.
 (Worker_TP1 pid=101844) ERROR 11-19 15:32:13 [multiproc_executor.py:1029] Traceback (most recent call last):
