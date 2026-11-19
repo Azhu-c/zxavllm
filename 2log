@@ -1,3 +1,6 @@
+bash: /workspace/ycp/vllm_serve_run/run_vllm_serve_8p8d_mtp_p_safe.sh: No such file or directory
+
+
 git -C "/workspace/ycp/vllm" rev-parse --git-dir
 
 git -C "/workspace/ycp/vllm-ascend" rev-parse --git-dir
