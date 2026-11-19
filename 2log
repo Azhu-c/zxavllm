@@ -1,3 +1,20 @@
+]# ls -ld "$VLLM_ROOT/.git"
+ls -ld "$ASCEND_ROOT/.git"
+
+git -C "$VLLM_ROOT" status
+git -C "$ASCEND_ROOT" status
+ls: cannot access '/.git': No such file or directory
+ls: cannot access '/.git': No such file or directory
+fatal: detected dubious ownership in repository at '/workspace/ycp/vllm_serve_run'
+To add an exception for this directory, call:
+
+	git config --global --add safe.directory /workspace/ycp/vllm_serve_run
+fatal: detected dubious ownership in repository at '/workspace/ycp/vllm_serve_run'
+To add an exception for this directory, call:
+
+	git config --global --add safe.directory /workspace/ycp/vllm_serve_run
+
+
 (APIServer pid=656912) INFO 11-19 11:15:56 [vllm.py:1169] Disabling NCCL for DP synchronization when using async scheduling.
 (APIServer pid=656912) INFO 11-19 11:15:56 [kernel.py:306] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
 (APIServer pid=656912) INFO 11-19 11:15:56 [utils.py:181] No quantization signature detected from model files for "/home/y00906461/models/Qwen3-30B-A3B-Instruct-2507". The model will be loaded as float. To force a quantization method, pass "--quantization <method>" explicitly.
