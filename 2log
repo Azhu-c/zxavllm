@@ -1,3 +1,7 @@
+git -C "/workspace/ycp/vllm" rev-parse --git-dir
+
+git -C "/workspace/ycp/vllm-ascend" rev-parse --git-dir
+
 (Worker_TP1 pid=101844) ERROR 11-19 15:32:13 [multiproc_executor.py:1029] WorkerProc hit an exception.
 (Worker_TP1 pid=101844) ERROR 11-19 15:32:13 [multiproc_executor.py:1029] Traceback (most recent call last):
 (Worker_TP1 pid=101844) ERROR 11-19 15:32:13 [multiproc_executor.py:1029]   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/v1/executor/multiproc_executor.py", line 1021, in worker_busy_loop
