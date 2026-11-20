@@ -1,0 +1,93 @@
+def ensure_zmq_recv(
+    socket: zmq.Socket,  # type: ignore
+    path: str,
+    max_retries: int = 3,
+) -> bytes:
+    retries_left = max_retries
+    while True:
+        try:
+            return socket.recv()
+        except zmq.ZMQError as e:  # type: ignore
+            retries_left -= 1
+            if retries_left > 0:
+                logger.warning("Receive failed. error=%s, attempts_left=%d. ", e, retries_left)
+                time.sleep(0.1)
+            else:
+                logger.error("Receive failed after all retries. source=%s, error=%s. ", path, e)
+                raise RuntimeError(f"Failed to receive data after {max_retries} retries: {e}")
+
+
+def transfer_groups_need_independent_block_ids(
+    kv_group2layeridx: dict[int, tuple[dict[str, Any], list[int]]],
+    block_size_scale: list[list[int]],
+) -> bool:
+    """Whether split transfer groups need separately expanded block IDs.
+
+    Transfer groups that share one KV cache manager group normally share the
+    same logical block table. They only need independent block-id lists when
+    their tensor layouts use different logical-to-kernel block scales.
+    """
+    group_scales: dict[int, int] = {}
+    for group_idx, (group_spec, layer_indices) in kv_group2layeridx.items():
+        if group_spec.get("kv_cache_spec_type") == "MambaSpec":
+            continue
+        kv_cache_group_id = group_spec.get("kv_cache_group_id", group_idx)
+        scale = 1
+        if layer_indices and layer_indices[0] < len(block_size_scale) and block_size_scale[layer_indices[0]]:
+            scale = block_size_scale[layer_indices[0]][0]
+        previous_scale = group_scales.setdefault(kv_cache_group_id, scale)
+        if previous_scale != scale:
+            return True
+    return False
+
+
+# decode node should know pp_partition_layer in prefill node,
+# it is configured in kv_transfer_config by partition_list_str,
+# default using vllm layer split algorithm.
+def build_layer_name_to_metadata_idx(
+    kv_group2layeridx: dict[int, tuple[dict[str, Any], list[int]]],
+) -> dict[str, int]:
+    layer_name_to_idx: dict[str, int] = {}
+    for group_spec, layer_indices in kv_group2layeridx.values():
+        layer_names = group_spec.get("layer_names", [])
+        for layer_name, layer_idx in zip(layer_names, layer_indices):
+            layer_name_to_idx[layer_name] = layer_idx
+    return layer_name_to_idx
+
+
+def resolve_remote_layer_idx(
+    local_layer_idx: int,
+    group_spec: dict[str, Any],
+    local_layer_indices: list[int],
+    remote_layer_name_to_idx: dict[str, int],
+) -> int:
+    """Resolve a remote metadata index by the stable cache-layer name."""
+    layer_names = group_spec.get("layer_names", [])
+    try:
+        position = local_layer_indices.index(local_layer_idx)
+        layer_name = layer_names[position]
+    except (ValueError, IndexError) as error:
+        raise RuntimeError(f"Cannot resolve local KV metadata index {local_layer_idx} to a layer name.") from error
+    try:
+        return remote_layer_name_to_idx[layer_name]
+    except KeyError as error:
+        raise RuntimeError(f"Remote KV metadata does not contain layer {layer_name!r}.") from error
+
+
+def get_prefill_pp_indices(
+    num_hidden_layers: int, pp_rank: int, pp_size: int, partition_list_str: str | None = None
+) -> tuple[int, int]:
+    if partition_list_str is None:
+        return get_pp_indices(num_hidden_layers, pp_rank, pp_size)
+    else:
+        try:
+            partitions = [int(layer) for layer in partition_list_str.split(",")]
+        except ValueError as err:
+            raise ValueError("Invalid partition string: {}".format(partition_list_str)) from err
+        if len(partitions) != pp_size:
+            raise ValueError(f"{len(partitions)=} does not match {pp_size=}.")
+        if sum(partitions) != num_hidden_layers:
+            raise ValueError(f"{sum(partitions)=} does not match {num_hidden_layers=}.")
+        start_layer = sum(partitions[:pp_rank])
+        end_layer = start_layer + partitions[pp_rank]
+        return (start_layer, end_layer)
