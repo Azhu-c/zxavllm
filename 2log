@@ -1,3 +1,35 @@
+诊断目录：/tmp/dyntralb-diag.9ISUN5
+total 776K
+-rw-------. 1 root root 8.0K Nov 20 11:01 20261120_1056_Dataset-20260729-1733_rounds1_bl.txt
+-rw-------. 1 root root 251K Nov 20 11:01 20261120_1056_qwen3_5_mtp_decode_dp8_bl.log
+-rw-------. 1 root root 126K Nov 20 11:01 20261120_1056_qwen3_5_mtp_prefill_tp8.log
+-rw-------. 1 root root  785 Nov 20 11:01 automatic_benchmark_eta_history.json
+-rw-------. 1 root root 251K Nov 20 11:01 decoder_bl.log
+-rw-------. 1 root root 126K Nov 20 11:01 prefiller.log
+-rw-------. 1 root root 1.8K Nov 20 11:01 proxy.log
+(Worker_TP0 pid=804085) INFO 11-20 10:58:25 [backends.py:1094] Using cache directory: /tmp/dyntralb-diag.9ISUN5/vllm-cache/torch_compile_cache/79716ce4fc/rank_0_0/backbone for vLLM's torch.compile
+(Worker_TP6 pid=804091) INFO 11-20 10:58:45 [compiler_interface.py:190] Skipping npugraph_ex cache for graph containing Triton kernels (kernel_side_table indices are process-local): /tmp/dyntralb-diag.9ISUN5/vllm-cache/torch_compile_cache/79716ce4fc/rank_6_0/backbone/artifact_compile_range_1_8192_subgraph_0
+(Worker_TP7 pid=804093) INFO 11-20 10:58:46 [compiler_interface.py:190] Skipping npugraph_ex cache for graph containing Triton kernels (kernel_side_table indices are process-local): /tmp/dyntralb-diag.9ISUN5/vllm-cache/torch_compile_cache/79716ce4fc/rank_7_0/backbone/artifact_compile_range_1_8192_subgraph_0
+(Worker_TP1 pid=804086) INFO 11-20 10:58:46 [compiler_interface.py:190] Skipping npugraph_ex cache for graph containing Triton kernels (kernel_side_table indices are process-local): /tmp/dyntralb-diag.9ISUN5/vllm-cache/torch_compile_cache/79716ce4fc/rank_1_0/backbone/artifact_compile_range_1_8192_subgraph_0
+(Worker_TP3 pid=804088) INFO 11-20 10:58:46 [compiler_interface.py:190] Skipping npugraph_ex cache for graph containing Triton kernels (kernel_side_table indices are process-local): /tmp/dyntralb-diag.9ISUN5/vllm-cache/torch_compile_cache/79716ce4fc/rank_3_0/backbone/artifact_compile_range_1_8192_subgraph_0
+(Worker_TP0 pid=804085) INFO 11-20 10:58:46 [compiler_interface.py:190] Skipping npugraph_ex cache for graph containing Triton kernels (kernel_side_table indices are process-local): /tmp/dyntralb-diag.9ISUN5/vllm-cache/torch_compile_cache/79716ce4fc/rank_0_0/backbone/artifact_compile_range_1_8192_subgraph_0
+(Worker_TP4 pid=804089) INFO 11-20 10:58:46 [compiler_interface.py:190] Skipping npugraph_ex cache for graph containing Triton kernels (kernel_side_table indices are process-local): /tmp/dyntralb-diag.9ISUN5/vllm-cache/torch_compile_cache/79716ce4fc/rank_4_0/backbone/artifact_compile_range_1_8192_subgraph_0
+(Worker_TP5 pid=804090) INFO 11-20 10:58:46 [compiler_interface.py:190] Skipping npugraph_ex cache for graph containing Triton kernels (kernel_side_table indices are process-local): /tmp/dyntralb-diag.9ISUN5/vllm-cache/torch_compile_cache/79716ce4fc/rank_5_0/backbone/artifact_compile_range_1_8192_subgraph_0
+(Worker_TP2 pid=804087) INFO 11-20 10:58:47 [compiler_interface.py:190] Skipping npugraph_ex cache for graph containing Triton kernels (kernel_side_table indices are process-local): /tmp/dyntralb-diag.9ISUN5/vllm-cache/torch_compile_cache/79716ce4fc/rank_2_0/backbone/artifact_compile_range_1_8192_subgraph_0
+(Worker_TP0 pid=804085) INFO 11-20 10:58:50 [decorators.py:708] saved AOT compiled function to /tmp/dyntralb-diag.9ISUN5/vllm-cache/torch_compile_cache/torch_aot_compile/c98b2af6ee8202362003f77724faf6530f83ce791d749f7840c212a452b73b00/rank_0_0/model
+(Worker_TP0 pid=804085) INFO 11-20 10:58:51 [backends.py:1094] Using cache directory: /tmp/dyntralb-diag.9ISUN5/vllm-cache/torch_compile_cache/79716ce4fc/rank_0_0/eagle_head for vLLM's torch.compile
+(Worker_TP6 pid=804091) INFO 11-20 10:58:52 [compiler_interface.py:199] Saved compiled graph to cache: /tmp/dyntralb-diag.9ISUN5/vllm-cache/torch_compile_cache/79716ce4fc/rank_6_0/eagle_head/artifact_compile_range_1_8192_subgraph_0
+(Worker_TP7 pid=804093) INFO 11-20 10:58:52 [compiler_interface.py:199] Saved compiled graph to cache: /tmp/dyntralb-diag.9ISUN5/vllm-cache/torch_compile_cache/79716ce4fc/rank_7_0/eagle_head/artifact_compile_range_1_8192_subgraph_0
+(Worker_TP0 pid=804085) INFO 11-20 10:58:52 [compiler_interface.py:199] Saved compiled graph to cache: /tmp/dyntralb-diag.9ISUN5/vllm-cache/torch_compile_cache/79716ce4fc/rank_0_0/eagle_head/artifact_compile_range_1_8192_subgraph_0
+(Worker_TP3 pid=804088) INFO 11-20 10:58:52 [compiler_interface.py:199] Saved compiled graph to cache: /tmp/dyntralb-diag.9ISUN5/vllm-cache/torch_compile_cache/79716ce4fc/rank_3_0/eagle_head/artifact_compile_range_1_8192_subgraph_0
+(Worker_TP1 pid=804086) INFO 11-20 10:58:52 [compiler_interface.py:199] Saved compiled graph to cache: /tmp/dyntralb-diag.9ISUN5/vllm-cache/torch_compile_cache/79716ce4fc/rank_1_0/eagle_head/artifact_compile_range_1_8192_subgraph_0
+(Worker_TP5 pid=804090) INFO 11-20 10:58:52 [compiler_interface.py:199] Saved compiled graph to cache: /tmp/dyntralb-diag.9ISUN5/vllm-cache/torch_compile_cache/79716ce4fc/rank_5_0/eagle_head/artifact_compile_range_1_8192_subgraph_0
+(Worker_TP4 pid=804089) INFO 11-20 10:58:52 [compiler_interface.py:199] Saved compiled graph to cache: /tmp/dyntralb-diag.9ISUN5/vllm-cache/torch_compile_cache/79716ce4fc/rank_4_0/eagle_head/artifact_compile_range_1_8192_subgraph_0
+(Worker_TP0 pid=804085) INFO 11-20 10:58:52 [decorators.py:708] saved AOT compiled function to /tmp/dyntralb-diag.9ISUN5/vllm-cache/torch_compile_cache/torch_aot_compile/285a99fe6e40227d33daff6c4b26e7dc7b1495596d213497cee17ad48e2d8077/rank_0_0/model
+(Worker_TP2 pid=804087) INFO 11-20 10:58:52 [compiler_interface.py:199] Saved compiled graph to cache: /tmp/dyntralb-diag.9ISUN5/vllm-cache/torch_compile_cache/79716ce4fc/rank_2_0/eagle_head/artifact_compile_range_1_8192_subgraph_0
+
+
+
 (Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029] WorkerProc hit an exception.
 (Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029] Traceback (most recent call last):
 (Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm/vllm/v1/executor/multiproc_executor.py", line 1021, in worker_busy_loop
