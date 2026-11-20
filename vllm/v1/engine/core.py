@@ -1905,3 +1905,572 @@ class EngineCoreProc(EngineCore):
                 by_client[request.client_index].add(request.request_id)
             for client_index, req_ids in by_client.items():
                 self._send_abort_outputs_to_client(list(req_ids), client_index)
+
+class DPEngineCoreProc(EngineCoreProc):
+    """ZMQ-wrapper for running EngineCore in background process
+    in a data parallel context."""
+
+    def __init__(
+        self,
+        vllm_config: VllmConfig,
+        local_client: bool,
+        handshake_address: str,
+        executor_class: type[Executor],
+        log_stats: bool,
+        client_handshake_address: str | None = None,
+        tensor_queue: Queue | None = None,
+    ):
+        assert vllm_config.model_config.is_moe, (
+            "DPEngineCoreProc should only be used for MoE models"
+        )
+
+        scheduler_config = vllm_config.scheduler_config
+        self.prefill_schedule_interval = scheduler_config.prefill_schedule_interval
+
+        # Counts forward-passes of the model so that we can synchronize
+        # finished with DP peers every N steps.
+        self.step_counter = 0
+        self.current_wave = 0
+
+        # Two-phase pause protocol state. When pending_pause is True, the
+        # engine keeps stepping (dummy batches) while waiting for all DP
+        # ranks to also set pending_pause. Once all ranks agree via
+        # all-reduce, ignore_start_dp_wave is set so that stale
+        # START_DP_WAVE messages cannot re-wake the engines.
+        self.pending_pause = False
+        self.ignore_start_dp_wave = False
+
+        from vllm.distributed.elastic_ep.elastic_state import ElasticEPScalingState
+
+        self.eep_scaling_state: ElasticEPScalingState | None = None
+
+        # Initialize the engine.
+        dp_rank = vllm_config.parallel_config.data_parallel_rank
+        super().__init__(
+            vllm_config,
+            local_client,
+            handshake_address,
+            executor_class,
+            log_stats,
+            client_handshake_address,
+            engine_index=dp_rank,
+            tensor_queue=tensor_queue,
+        )
+
+    def _init_data_parallel(self, vllm_config: VllmConfig):
+        # Configure GPUs and stateless process group for data parallel.
+        parallel_config = vllm_config.parallel_config
+        dp_rank = parallel_config.data_parallel_rank
+        dp_size = parallel_config.data_parallel_size
+        local_dp_rank = parallel_config.data_parallel_rank_local
+
+        assert dp_size > 1
+        assert local_dp_rank is not None
+        assert 0 <= local_dp_rank <= dp_rank < dp_size
+
+        self.dp_rank = dp_rank
+        self.dp_size = dp_size
+        dp_group, dp_store = parallel_config.stateless_init_dp_group(return_store=True)
+        self.dp_group, self.dp_store = dp_group, dp_store
+
+    def shutdown(self):
+        super().shutdown()
+        if dp_group := getattr(self, "dp_group", None):
+            stateless_destroy_torch_distributed_process_group(dp_group)
+
+    def _pause_complete(self) -> bool:
+        """Two-phase DP-aware pause.
+
+        Phase 1: Set local pause state and ``pending_pause`` flag. If the
+        engines are idle, kick-start them by setting ``engines_running`` to
+        True so ranks enter the stepping loop and reach the all-reduce
+        consensus checkpoint in ``_has_global_unfinished_reqs``.
+
+        Phase 2 (in ``_has_global_unfinished_reqs``): Once the all-reduce
+        confirms that **all** ranks have ``pending_pause`` set, collectively
+        stop stepping and set ``ignore_start_dp_wave`` so that stale
+        ``START_DP_WAVE`` messages cannot re-wake any engine.
+        """
+        self.pending_pause = True
+        self.engines_running = True
+
+        return False
+
+    def add_request(self, request: Request, request_wave: int = 0):
+        super().add_request(request, request_wave)
+        if self.has_coordinator and request_wave != self.current_wave:
+            if request_wave > self.current_wave:
+                self.current_wave = request_wave
+            elif (
+                not self.engines_running
+                and self.scheduler.pause_state == PauseState.UNPAUSED
+            ):
+                # Request received for an already-completed wave, notify
+                # front-end that we need to start the next one.
+                self.engines_running = True
+                self.output_queue.put_nowait(
+                    (-1, EngineCoreOutputs(start_wave=self.current_wave))
+                )
+
+    def resume_scheduler(self):
+        if self.pending_pause or (self.engines_running and self.ignore_start_dp_wave):
+            raise RuntimeError(
+                "resume_scheduler called while pause is still in "
+                "flight. Wait for the pause future to resolve before "
+                "resuming."
+            )
+        if self.engines_running:
+            logger.debug("Resume called while engines are not paused, ignoring.")
+            return
+
+        super().resume_scheduler()
+        self.ignore_start_dp_wave = False
+
+        # Barrier: wait for all DP ranks to have resumed (and cleared
+        # ignore_start_dp_wave) before any rank starts stepping. Uses
+        # the existing all-reduce which is safe because engines are
+        # stopped.
+        has_global_unfinished = ParallelConfig.has_unfinished_dp(
+            self.dp_group, self.scheduler.has_unfinished_requests()
+        )
+
+        if has_global_unfinished:
+            self.engines_running = True
+
+    def barrier(self):
+        """Blocking barrier on the DP process group (test-only utility)."""
+        import torch.distributed as dist
+
+        dist.barrier(group=self.dp_group)
+
+    def _handle_client_request(
+        self, request_type: EngineCoreRequestType, request: Any
+    ) -> None:
+        if request_type == EngineCoreRequestType.START_DP_WAVE:
+            if self.ignore_start_dp_wave:
+                return
+            new_wave, exclude_eng_index = request
+            if exclude_eng_index != self.engine_index and (
+                new_wave >= self.current_wave
+            ):
+                self.current_wave = new_wave
+                if not self.engines_running:
+                    logger.debug(
+                        "EngineCore starting idle loop for wave %d.",
+                        new_wave,
+                    )
+                    self.engines_running = True
+        else:
+            super()._handle_client_request(request_type, request)
+
+    def _maybe_publish_request_counts(self):
+        if not self.publish_dp_lb_stats:
+            return
+
+        # Publish our request counts (if they've changed), stamped with the
+        # lockstep-synchronized step counter and wave number.
+        counts = self.scheduler.get_request_counts()
+        if counts != self.last_counts:
+            self.last_counts = counts
+            stats = SchedulerStats(
+                *counts,
+                kv_cache_usage=self.scheduler.get_kv_cache_usage(),
+                step_counter=self.step_counter,
+                current_wave=self.current_wave,
+            )
+            self.output_queue.put_nowait((-1, EngineCoreOutputs(scheduler_stats=stats)))
+
+    def _should_throttle_prefills(self) -> bool:
+        # Throttle new prefills to cadence-aligned steps for DP balancing.
+        # step_counter is identical across DP ranks. On a fresh wave the
+        # counter is 0, so prefills are admitted immediately after idle.
+        return (
+            self.prefill_schedule_interval > 1
+            and self.step_counter % self.prefill_schedule_interval != 0
+        )
+
+    @fault_tolerant_wrapper
+    def run_busy_loop(self):
+        """Core busy loop of the EngineCore for data parallel case."""
+
+        # Loop until process is sent a SIGINT or SIGTERM
+        while self._handle_shutdown():
+            # 1) Poll the input queue until there is work to do.
+            self._process_input_queue()
+            # Publish request counts before and after GPU step to ensure freshness.
+            self._maybe_publish_request_counts()
+
+            if self.eep_scaling_state is not None:
+                state = self.eep_scaling_state
+                if state.commit_requested or not state.is_ready_for_switch():
+                    state.progress()
+                if state.is_complete():
+                    if state.worker_type == "removing":
+                        raise SystemExit
+                    self.process_input_queue_block = True
+                    self.eep_scaling_state = None
+                elif not state.commit_requested and state.is_ready_for_switch():
+                    self.process_input_queue_block = True
+
+            executed = self._process_engine_step()
+            self._maybe_publish_request_counts()
+
+            local_unfinished_reqs = self.scheduler.has_unfinished_requests()
+            if not executed:
+                if not local_unfinished_reqs and not self.engines_running:
+                    # All engines are idle.
+                    continue
+
+                # Execute a dummy pass when no ready requests ran, unless the
+                # engine is sleeping.
+                elif not self.model_executor.is_sleeping:
+                    with self.capture_iteration_details(None) as iteration_details:
+                        self.execute_dummy_batch()
+                    if iteration_details is not None and not self.has_coordinator:
+                        stats = self._make_iteration_details_stats(iteration_details)
+                        self.output_queue.put_nowait(
+                            (0, EngineCoreOutputs(scheduler_stats=stats))
+                        )
+
+            # 3) All-reduce operation to determine global unfinished reqs.
+            self.engines_running = self._has_global_unfinished_reqs(
+                local_unfinished_reqs
+            )
+
+            if not self.engines_running:
+                if self.dp_rank == 0 or not self.has_coordinator:
+                    # Notify client that we are pausing the loop.
+                    logger.debug(
+                        "Wave %d finished, pausing engine loop.", self.current_wave
+                    )
+                    # In the coordinator case, dp rank 0 sends updates to the
+                    # coordinator. Otherwise (offline spmd case), each rank
+                    # sends the update to its colocated front-end process.
+                    client_index = -1 if self.has_coordinator else 0
+                    self.output_queue.put_nowait(
+                        (
+                            client_index,
+                            EngineCoreOutputs(wave_complete=self.current_wave),
+                        )
+                    )
+                # Increment wave count and reset step counter.
+                self.current_wave += 1
+                self.step_counter = 0
+
+        raise SystemExit
+
+    def _has_global_unfinished_reqs(self, local_unfinished: bool) -> bool:
+        # Optimization - only perform finish-sync all-reduce every 32 steps.
+        self.step_counter += 1
+        if self.step_counter % 32 != 0:
+            return True
+
+        has_unfinished, pause_consensus = ParallelConfig.sync_dp_state(
+            self.dp_group,
+            has_unfinished=local_unfinished,
+            pending_pause=self.pending_pause,
+        )
+
+        if pause_consensus:
+            self.ignore_start_dp_wave = True
+            self.pending_pause = False
+            logger.debug("DP pause consensus reached, ignoring START_DP_WAVE.")
+
+        return has_unfinished
+
+    def reinitialize_distributed(
+        self, reconfig_request: ReconfigureDistributedRequest
+    ) -> str:
+        from copy import deepcopy
+
+        from vllm.distributed.elastic_ep.elastic_state import ElasticEPScalingState
+
+        new_parallel_config = deepcopy(self.vllm_config.parallel_config)
+        old_dp_size = new_parallel_config.data_parallel_size
+        new_parallel_config.data_parallel_size = reconfig_request.new_data_parallel_size
+        if (
+            reconfig_request.new_data_parallel_rank
+            != ReconfigureRankType.KEEP_CURRENT_RANK
+        ):
+            new_parallel_config.data_parallel_rank = (
+                reconfig_request.new_data_parallel_rank
+            )
+        new_parallel_config.data_parallel_master_ip = (
+            reconfig_request.new_data_parallel_master_ip
+        )
+        new_parallel_config.data_parallel_master_port = (
+            reconfig_request.new_data_parallel_master_port
+        )
+        new_parallel_config._data_parallel_master_port_list = (
+            reconfig_request.new_data_parallel_master_port_list
+        )
+        new_parallel_config._coord_store_port = reconfig_request.coord_store_port
+
+        is_scale_down = reconfig_request.new_data_parallel_size < old_dp_size
+        is_shutdown = (
+            reconfig_request.new_data_parallel_rank
+            == ReconfigureRankType.SHUTDOWN_CURRENT_RANK
+        )
+
+        if self.eep_scaling_state is not None:
+            raise RuntimeError("Elastic EP reconfiguration is already active")
+
+        state = ElasticEPScalingState(
+            model_executor=self.model_executor,
+            engine_core=self,
+            vllm_config=self.vllm_config,
+            new_parallel_config=new_parallel_config,
+            worker_type="removing" if is_shutdown else "existing",
+            scale_type="scale_down" if is_scale_down else "scale_up",
+            reconfig_request=reconfig_request,
+        )
+        self.eep_scaling_state = state
+
+        self.process_input_queue_block = False
+        logger.info(
+            "[Elastic EP] Received reconfiguration request and starting scaling up/down"
+        )
+        return state.ready_key
+
+    def commit_prepared_elastic_ep(self) -> None:
+        state = self.eep_scaling_state
+        if state is None or state.commit_requested or not state.is_ready_for_switch():
+            raise RuntimeError("No prepared Elastic EP reconfiguration is ready")
+        state.commit_requested = True
+        self.process_input_queue_block = False
+        logger.info("[Elastic EP] Committing prepared reconfiguration")
+
+    def _eep_send_engine_core_notification(
+        self, notification_type: EEPNotificationType
+    ):
+        """
+        Send notifications to EngineCoreClient, which can then forward
+        the notifications to other engine core processes. It is used for:
+        1) In scale down: removing core engines to notify EngineCoreClient
+           so EngineCoreClient can release their ray placement groups;
+        2) Both scale up/down: to notify EngineCoreClient that existing
+           core engines have already switched to the new parallel setup.
+        """
+        dp_rank = self.vllm_config.parallel_config.data_parallel_rank
+        notification_data = (notification_type.value, dp_rank)
+        outputs = EngineCoreOutputs(
+            utility_output=UtilityOutput(
+                call_id=EEP_NOTIFICATION_CALL_ID,
+                result=UtilityResult(notification_data),
+            )
+        )
+        outputs.engine_index = self.engine_index
+
+        if hasattr(self, "output_thread") and self.output_thread.is_alive():
+            self.output_queue.put_nowait((0, outputs))
+        else:
+            encoder = MsgpackEncoder()
+            with (
+                zmq.Context() as ctx,
+                make_zmq_socket(
+                    ctx, self.addresses.outputs[0], zmq.PUSH, linger=4000
+                ) as socket,
+            ):
+                socket.send_multipart(encoder.encode(outputs))
+
+    def _eep_scale_up_before_kv_init(self):
+        from vllm.distributed.elastic_ep.elastic_state import ElasticEPScalingState
+
+        self.ignore_start_dp_wave = True
+        state = ElasticEPScalingState(
+            model_executor=self.model_executor,
+            engine_core=self,
+            vllm_config=self.vllm_config,
+            new_parallel_config=self.vllm_config.parallel_config,
+            worker_type="new",
+            scale_type="scale_up",
+            reconfig_request=None,
+        )
+        if self.eep_scaling_state is not None:
+            raise RuntimeError("Elastic EP reconfiguration is already active")
+        self.eep_scaling_state = state
+        state.run_pre_kv_init_states()
+        self.process_input_queue_block = False
+
+
+class EngineCoreActorMixin:
+    """
+    Ray actor for running EngineCore in a data parallel context
+    """
+
+    def __init__(
+        self,
+        vllm_config: VllmConfig,
+        addresses: EngineZmqAddresses,
+        dp_rank: int = 0,
+        local_dp_rank: int = 0,
+    ):
+        # Initialize tracer for distributed tracing if configured.
+        maybe_init_worker_tracer(
+            instrumenting_module_name="vllm.engine_core",
+            process_kind="engine_core",
+            process_name=f"DPEngineCoreActor_DP{dp_rank}",
+        )
+
+        self.addresses = addresses
+        vllm_config.parallel_config.data_parallel_index = dp_rank
+        vllm_config.parallel_config.data_parallel_rank_local = local_dp_rank
+
+        self._set_nixl_side_channel_host()
+
+        # Set CUDA_VISIBLE_DEVICES as early as possible in actor life cycle
+        # NOTE: in MP we set CUDA_VISIBLE_DEVICES at process creation time,
+        # and this cannot be done in the same way for Ray because:
+        # 1) Ray manages life cycle of all ray workers (including
+        # DPEngineCoreActor)
+        # 2) Ray sets CUDA_VISIBLE_DEVICES based on num_gpus configuration
+        # To bypass 2, we need to also set
+        # RAY_EXPERIMENTAL_NOSET_CUDA_VISIBLE_DEVICES, but vLLM workers created
+        # thereafter would have CUDA_VISIBLE_DEVICES set, which is sticky:
+        # https://github.com/ray-project/ray/blob/e752fc319ddedd9779a0989b6d3613909bad75c9/python/ray/_private/worker.py#L456 # noqa: E501
+        # This is problematic because when the vLLM worker (a Ray actor)
+        # executes a task, it indexes into the sticky CUDA_VISIBLE_DEVICES
+        # rather than directly using the GPU ID, potentially resulting in
+        # index out of bounds error. See:
+        # https://github.com/ray-project/ray/pull/40461/files#diff-31e8159767361e4bc259b6d9883d9c0d5e5db780fcea4a52ead4ee3ee4a59a78R1860 # noqa: E501
+        # and get_accelerator_ids_for_accelerator_resource() in worker.py
+        # of ray.
+        self._set_visible_devices(vllm_config, local_dp_rank)
+
+    @staticmethod
+    def _set_nixl_side_channel_host():
+        import ray
+
+        # The driver-side value is excluded from Ray actor env propagation.
+        # Fill in an actor-local default while preserving explicit overrides.
+        os.environ.setdefault(
+            "VLLM_NIXL_SIDE_CHANNEL_HOST", ray.util.get_node_ip_address()
+        )
+
+    def _set_visible_devices(self, vllm_config: VllmConfig, local_dp_rank: int):
+        from vllm.platforms import current_platform
+
+        if current_platform.is_xpu():
+            pass
+        else:
+            device_control_env_var = current_platform.device_control_env_var
+            self._set_assigned_physical_gpu_ids(
+                vllm_config, local_dp_rank, device_control_env_var
+            )
+
+    def _set_assigned_physical_gpu_ids(
+        self,
+        vllm_config: VllmConfig,
+        local_dp_rank: int,
+        device_control_env_var: str,
+    ):
+        world_size = vllm_config.parallel_config.world_size
+        try:
+            physical_gpu_ids = get_physical_gpu_ids_for_local_dp_rank(
+                device_control_env_var,
+                local_dp_rank,
+                world_size,
+                user_assigned_gpu_ids=(
+                    vllm_config.parallel_config.assigned_physical_gpu_ids
+                ),
+            )
+            vllm_config.parallel_config.assigned_physical_gpu_ids = physical_gpu_ids
+        except IndexError as e:
+            raise Exception(
+                f"Error computing assigned_physical_gpu_ids: "
+                f"local range: [{local_dp_rank * world_size}, "
+                f"{(local_dp_rank + 1) * world_size}) "
+                f'base value: "{os.getenv(device_control_env_var)}"'
+            ) from e
+
+    @contextmanager
+    def _perform_handshakes(
+        self,
+        handshake_address: str,
+        identity: bytes,
+        local_client: bool,
+        vllm_config: VllmConfig,
+        client_handshake_address: str | None,
+    ):
+        """
+        For Ray, we don't need to actually perform handshake.
+        All addresses information is known before the actor creation.
+        Therefore, we simply yield these addresses.
+        """
+        yield self.addresses
+
+    def wait_for_init(self):
+        """
+        Wait until the engine core is initialized.
+
+        This is just an empty method. When ray.get() on this method
+        (or any other method of the actor) returns, it is guaranteed
+        that actor creation (i.e., __init__) is complete.
+        """
+        pass
+
+    def run(self):
+        """
+        Run the engine core busy loop.
+        """
+        try:
+            self.run_busy_loop()  # type: ignore[attr-defined]
+        except SystemExit:
+            logger.debug("EngineCore exiting.")
+            raise
+        except Exception:
+            logger.exception("EngineCore encountered a fatal error.")
+            raise
+        finally:
+            self.shutdown()  # type: ignore[attr-defined]
+
+
+class DPMoEEngineCoreActor(EngineCoreActorMixin, DPEngineCoreProc):
+    """Used for MoE model data parallel cases."""
+
+    def __init__(
+        self,
+        vllm_config: VllmConfig,
+        local_client: bool,
+        addresses: EngineZmqAddresses,
+        executor_class: type[Executor],
+        log_stats: bool,
+        dp_rank: int = 0,
+        local_dp_rank: int = 0,
+    ):
+        vllm_config.parallel_config.data_parallel_rank = dp_rank
+
+        EngineCoreActorMixin.__init__(
+            self, vllm_config, addresses, dp_rank, local_dp_rank
+        )
+        DPEngineCoreProc.__init__(
+            self, vllm_config, local_client, "", executor_class, log_stats
+        )
+
+
+class EngineCoreActor(EngineCoreActorMixin, EngineCoreProc):
+    """Used for non-MoE and/or non-DP cases."""
+
+    def __init__(
+        self,
+        vllm_config: VllmConfig,
+        local_client: bool,
+        addresses: EngineZmqAddresses,
+        executor_class: type[Executor],
+        log_stats: bool,
+        dp_rank: int = 0,
+        local_dp_rank: int = 0,
+    ):
+        vllm_config.parallel_config.reconfigure_for_independent_dp_rank()
+        EngineCoreActorMixin.__init__(
+            self, vllm_config, addresses, dp_rank, local_dp_rank
+        )
+        EngineCoreProc.__init__(
+            self,
+            vllm_config,
+            local_client,
+            "",
+            executor_class,
+            log_stats,
+            engine_index=dp_rank,
+        )
