@@ -1,3 +1,39 @@
+============ Serving Benchmark Result ============
+Successful requests:                     1000      
+Failed requests:                         0         
+Maximum request concurrency:             128       
+Request rate configured (RPS):           400.00    
+Benchmark duration (s):                  372.19    
+Total input tokens:                      10147845  
+Total generated tokens:                  1281307   
+Request throughput (req/s):              2.69      
+Output token throughput (tok/s):         3442.59   
+Peak output token throughput (tok/s):    1592.00   
+Peak concurrent requests:                137.00    
+Total token throughput (tok/s):          30707.64  
+---------------Time to First Token----------------
+Mean TTFT (ms):                          12595.79  
+Median TTFT (ms):                        10471.08  
+P50 TTFT (ms):                           10471.08  
+P90 TTFT (ms):                           24531.34  
+P99 TTFT (ms):                           62003.92  
+-----Time per Output Token (excl. 1st token)------
+Mean TPOT (ms):                          23.03     
+Median TPOT (ms):                        17.18     
+P50 TPOT (ms):                           17.18     
+P90 TPOT (ms):                           33.05     
+P99 TPOT (ms):                           107.50    
+---------------Inter-token Latency----------------
+Mean ITL (ms):                           74.00     
+Median ITL (ms):                         49.74     
+P50 ITL (ms):                            49.74     
+P90 ITL (ms):                            60.14     
+P99 ITL (ms):                            92.48     
+==================================================
+
+
+
+
 bash: /workspace/ycp/vllm_serve_run/run_vllm_serve_8p8d_mtp_p_safe.sh: No such file or directory
 
 
