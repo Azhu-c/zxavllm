@@ -1,3 +1,123 @@
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029] WorkerProc hit an exception.
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029] Traceback (most recent call last):
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm/vllm/v1/executor/multiproc_executor.py", line 1021, in worker_busy_loop
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     output = func(*args, **kwargs)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]              ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/usr/local/python3.11.10/lib/python3.11/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     return func(*args, **kwargs)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm-ascend/vllm_ascend/worker/worker.py", line 513, in determine_available_memory
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     self.model_runner.profile_run()
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm-ascend/vllm_ascend/worker/model_runner_v1.py", line 3519, in profile_run
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     super().profile_run()
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm/vllm/v1/worker/gpu_model_runner.py", line 6560, in profile_run
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     hidden_states, last_hidden_states = self._dummy_run(
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]                                         ^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/usr/local/python3.11.10/lib/python3.11/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     return func(*args, **kwargs)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm-ascend/vllm_ascend/worker/model_runner_v1.py", line 3455, in _dummy_run
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     outputs = self._model_forward(
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]               ^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm-ascend/vllm_ascend/worker/model_runner_v1.py", line 2683, in _model_forward
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     hidden_states = run_model()
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]                     ^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm-ascend/vllm_ascend/compilation/acl_graph.py", line 145, in __call__
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     return self.runnable(*args, **kwargs)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/usr/local/python3.11.10/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     return self._call_impl(*args, **kwargs)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/usr/local/python3.11.10/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     return forward_call(*args, **kwargs)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm/vllm/model_executor/models/qwen3_5.py", line 574, in forward
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     hidden_states = self.language_model.model(
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]                     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm/vllm/compilation/decorators.py", line 573, in __call__
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     output = self.aot_compiled_fn(self, *args, **kwargs)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/usr/local/python3.11.10/lib/python3.11/site-packages/torch/_dynamo/aot_compile.py", line 124, in __call__
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     return self.fn(*args, **kwargs)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]            ^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm/vllm/model_executor/models/qwen3_next.py", line 646, in forward
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     def forward(
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm/vllm/compilation/caching.py", line 225, in __call__
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     return self.optimized_call(*args, **kwargs)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "<string>", line 5, in execution_fn
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm/vllm/compilation/piecewise_backend.py", line 380, in __call__
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     return range_entry.runnable(*args)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm-ascend/vllm_ascend/compilation/compiler_interface.py", line 363, in compiled_fn
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     result = _inner_fn(*args, **kwargs)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/usr/local/python3.11.10/lib/python3.11/site-packages/torch_npu/dynamo/npugraph_ex/npu_fx_compiler.py", line 511, in __call__
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     gm_result = self.run_kernel(*args, **kwargs)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "<string>", line 115, in kernel
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029] ValueError: too many values to unpack (expected 19)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029] Traceback (most recent call last):
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm/vllm/v1/executor/multiproc_executor.py", line 1021, in worker_busy_loop
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     output = func(*args, **kwargs)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]              ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/usr/local/python3.11.10/lib/python3.11/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     return func(*args, **kwargs)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm-ascend/vllm_ascend/worker/worker.py", line 513, in determine_available_memory
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     self.model_runner.profile_run()
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm-ascend/vllm_ascend/worker/model_runner_v1.py", line 3519, in profile_run
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     super().profile_run()
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm/vllm/v1/worker/gpu_model_runner.py", line 6560, in profile_run
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     hidden_states, last_hidden_states = self._dummy_run(
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]                                         ^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/usr/local/python3.11.10/lib/python3.11/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     return func(*args, **kwargs)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm-ascend/vllm_ascend/worker/model_runner_v1.py", line 3455, in _dummy_run
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     outputs = self._model_forward(
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]               ^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm-ascend/vllm_ascend/worker/model_runner_v1.py", line 2683, in _model_forward
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     hidden_states = run_model()
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]                     ^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm-ascend/vllm_ascend/compilation/acl_graph.py", line 145, in __call__
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     return self.runnable(*args, **kwargs)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/usr/local/python3.11.10/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     return self._call_impl(*args, **kwargs)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/usr/local/python3.11.10/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     return forward_call(*args, **kwargs)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm/vllm/model_executor/models/qwen3_5.py", line 574, in forward
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     hidden_states = self.language_model.model(
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]                     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm/vllm/compilation/decorators.py", line 573, in __call__
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     output = self.aot_compiled_fn(self, *args, **kwargs)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/usr/local/python3.11.10/lib/python3.11/site-packages/torch/_dynamo/aot_compile.py", line 124, in __call__
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     return self.fn(*args, **kwargs)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]            ^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm/vllm/model_executor/models/qwen3_next.py", line 646, in forward
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     def forward(
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm/vllm/compilation/caching.py", line 225, in __call__
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     return self.optimized_call(*args, **kwargs)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "<string>", line 5, in execution_fn
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm/vllm/compilation/piecewise_backend.py", line 380, in __call__
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     return range_entry.runnable(*args)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/workspace/ycp/vllm-ascend/vllm_ascend/compilation/compiler_interface.py", line 363, in compiled_fn
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     result = _inner_fn(*args, **kwargs)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "/usr/local/python3.11.10/lib/python3.11/site-packages/torch_npu/dynamo/npugraph_ex/npu_fx_compiler.py", line 511, in __call__
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]     gm_result = self.run_kernel(*args, **kwargs)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029]   File "<string>", line 115, in kernel
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029] ValueError: too many values to unpack (expected 19)
+(Worker_TP4 pid=769914) ERROR 11-20 10:45:41 [multiproc_executor.py:1029] 
+
+
 ============ Serving Benchmark Result ============
 Successful requests:                     1000      
 Failed requests:                         0         
