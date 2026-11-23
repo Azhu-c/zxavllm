@@ -1,3 +1,9 @@
+# docker exec -it z_vllm_cp bash
+Error response from daemon: Container 75ba90e403906d4853b64822eb63e2b8a607f3fc26b07afe205d4e65106e507f is not running
+
+
+
+
 诊断目录：/tmp/dyntralb-diag.9ISUN5
 total 776K
 -rw-------. 1 root root 8.0K Nov 20 11:01 20261120_1056_Dataset-20260729-1733_rounds1_bl.txt
