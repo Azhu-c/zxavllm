@@ -1,0 +1,73 @@
+并发开8
+========== 5 轮结果平均值 ==========
+============ Serving Benchmark Result ============
+Successful requests:                     1000.00
+Failed requests:                         0.00
+Maximum request concurrency:             128.00
+Request rate configured (RPS):           400.00
+Benchmark duration (s):                  409.37
+Total input tokens:                      10147845.00
+Total generated tokens:                  1281307.00
+Request throughput (req/s):              2.44
+Output token throughput (tok/s):         3130.08
+Peak output token throughput (tok/s):    1344.00
+Peak concurrent requests:                136.20
+Total token throughput (tok/s):          27920.07
+---------------Time to First Token----------------
+Mean TTFT (ms):                          23540.49
+Median TTFT (ms):                        23653.74
+P50 TTFT (ms):                           23653.74
+P90 TTFT (ms):                           30801.62
+P99 TTFT (ms):                           39174.14
+-----Time per Output Token (excl. 1st token)------
+Mean TPOT (ms):                          18.28
+Median TPOT (ms):                        18.38
+P50 TPOT (ms):                           18.38
+P90 TPOT (ms):                           19.52
+P99 TPOT (ms):                           20.61
+---------------Inter-token Latency----------------
+Mean ITL (ms):                           56.49
+Median ITL (ms):                         53.11
+P50 ITL (ms):                            53.11
+P90 ITL (ms):                            59.90
+P99 ITL (ms):                            201.20
+==================================================
+说明：每项均为各轮结果的算术平均；百分位数的平均不是合并所有请求后的百分位数。
+
+
+并发开64
+========== 5 轮结果平均值 ==========
+============ Serving Benchmark Result ============
+Successful requests:                     1000.00
+Failed requests:                         0.00
+Maximum request concurrency:             128.00
+Request rate configured (RPS):           400.00
+Benchmark duration (s):                  1609.77
+Total input tokens:                      10147845.00
+Total generated tokens:                  1281307.00
+Request throughput (req/s):              0.62
+Output token throughput (tok/s):         795.98
+Peak output token throughput (tok/s):    945.60
+Peak concurrent requests:                132.80
+Total token throughput (tok/s):          7100.08
+---------------Time to First Token----------------
+Mean TTFT (ms):                          4916.96
+Median TTFT (ms):                        2670.55
+P50 TTFT (ms):                           2670.55
+P90 TTFT (ms):                           10217.88
+P99 TTFT (ms):                           32696.29
+-----Time per Output Token (excl. 1st token)------
+Mean TPOT (ms):                          151.26
+Median TPOT (ms):                        154.97
+P50 TPOT (ms):                           154.97
+P90 TPOT (ms):                           163.67
+P99 TPOT (ms):                           172.04
+---------------Inter-token Latency----------------
+Mean ITL (ms):                           465.79
+Median ITL (ms):                         470.12
+P50 ITL (ms):                            470.12
+P90 ITL (ms):                            515.59
+P99 ITL (ms):                            578.68
+==================================================
+说明：每项均为各轮结果的算术平均；百分位数的平均不是合并所有请求后的百分位数。
+
