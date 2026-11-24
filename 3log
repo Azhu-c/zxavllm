@@ -70,7 +70,18 @@ DYNTRA_LB_ADDITIONAL_CONFIG=$(
 )
 
 
-
+改cuda graph
+--compilation-config \
+'{
+  "cudagraph_mode": "FULL_DECODE_ONLY",
+  "max_cudagraph_capture_size": 256,
+  "cudagraph_capture_sizes": [
+    4,8,12,16,20,24,28,32,
+    40,48,56,64,
+    80,96,112,128,
+    160,192,224,256
+  ]
+}' \
 
 并发开8
 ========== 5 轮结果平均值 ==========
