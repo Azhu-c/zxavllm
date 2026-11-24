@@ -1,3 +1,5 @@
+curl --noproxy '*' -sS --max-time 10 \
+  http://61.28.30.29:13700/v1/models | python -m json.tool
 grep -RniE -B 3 -A 6 \
   'maximum context length|max_tokens.*too large|max_completion_tokens.*too large|input tokens' \
   /workspace/ycp/vllm_serve_run/log/ | tail -n 100
