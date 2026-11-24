@@ -83,6 +83,9 @@ DYNTRA_LB_ADDITIONAL_CONFIG=$(
   ]
 }' \
 
+之前是32 --compilation-config \
+    '{"cudagraph_mode":"FULL_DECODE_ONLY","max_cudagraph_capture_size":32,"cudagraph_capture_sizes":[4,8,12,16,20,24,28,32]}' \
+
 并发开8
 ========== 5 轮结果平均值 ==========
 ============ Serving Benchmark Result ============
