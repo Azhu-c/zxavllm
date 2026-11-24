@@ -1,3 +1,77 @@
+lb的参数
+DYNTRA_LB_ADDITIONAL_CONFIG=$(
+    printf '{
+        "enable_cpu_binding": true,
+        "scheduler_config": {
+            "recompute_scheduler_enable": %s,
+            "dyntra_lb_config": {
+                "enabled": true,
+                "enable_diagnostics": %s,
+                "mode": "static",
+                "start_step": 0,
+                "end_step": -1,
+                "bubble_threshold": %s,
+                "balance_interval": 1,
+                "max_pause_steps": 4,
+                "min_run_steps": 4,
+                "max_pauses_per_rank": 1,
+                "min_throughput_gain": 0.02,
+                "step_latency_fixed_us": 20000.0,
+                "step_latency_per_block_us": 19.2,
+                "step_latency_per_seq_us": 0.0,
+                "pause_resume_cost_us": 0.0,
+                "gain_horizon_steps": 4,
+                "min_balance_gain": null,
+                "max_balance_throughput_loss": 0.0
+            }
+        }
+    }' \
+        "${RECOMPUTE_SCHEDULER_ENABLE}" \
+        "${ENABLE_DIAGNOSTICS}" \
+        "${BUBBLE_THRESHOLD}"
+)
+
+
+dynam的参数
+DYNTRA_LB_ADDITIONAL_CONFIG=$(
+    printf '{
+        "enable_cpu_binding": true,
+        "scheduler_config": {
+            "recompute_scheduler_enable": %s,
+            "dyntra_lb_config": {
+                "enabled": true,
+                "enable_diagnostics": %s,
+                "mode": "dynamic",
+                "start_step": 0,
+                "end_step": -1,
+                "bubble_threshold": %s,
+                "long_req_block_threshold": %s,
+                "dynamic_max_step": %s,
+                "balance_interval": 1,
+                "max_pause_steps": 4,
+                "min_run_steps": 4,
+                "max_pauses_per_rank": 1,
+                "min_throughput_gain": 0.02,
+                "step_latency_fixed_us": 20000.0,
+                "step_latency_per_block_us": 19.2,
+                "step_latency_per_seq_us": 0.0,
+                "pause_resume_cost_us": 0.0,
+                "gain_horizon_steps": 4,
+                "min_balance_gain": null,
+                "max_balance_throughput_loss": 0.0
+            }
+        }
+    }' \
+        "${RECOMPUTE_SCHEDULER_ENABLE}" \
+        "${ENABLE_DIAGNOSTICS}" \
+        "${BUBBLE_THRESHOLD}" \
+        "${LONG_REQ_BLOCK_THRESHOLD}" \
+        "${DYNAMIC_MAX_STEP}"
+)
+
+
+
+
 并发开8
 ========== 5 轮结果平均值 ==========
 ============ Serving Benchmark Result ============
