@@ -1,3 +1,5 @@
+"ascend_compilation_config":{"enable_npugraph_ex":false}
+
 (EngineCore pid=1752865) ERROR 11-24 11:15:56 [core.py:1343] EngineCore failed to start.
 (EngineCore pid=1752865) ERROR 11-24 11:15:56 [core.py:1343] Traceback (most recent call last):
 (EngineCore pid=1752865) ERROR 11-24 11:15:56 [core.py:1343]   File "/home/y00906461/20260228_vllm_ascend/20260713_pr_vllm_ascend/vllm/vllm/v1/engine/core.py", line 1312, in run_engine_core
