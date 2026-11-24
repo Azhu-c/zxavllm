@@ -1,37 +1,4 @@
-========== 5 轮结果平均值 ==========
-============ Serving Benchmark Result ============
-Successful requests:                     1000.00
-Failed requests:                         0.00
-Maximum request concurrency:             128.00
-Request rate configured (RPS):           400.00
-Benchmark duration (s):                  338.32
-Total input tokens:                      10147845.00
-Total generated tokens:                  1281307.00
-Request throughput (req/s):              2.95
-Output token throughput (tok/s):         3787.68
-Peak output token throughput (tok/s):    1868.20
-Peak concurrent requests:                137.80
-Total token throughput (tok/s):          33785.77
----------------Time to First Token----------------
-Mean TTFT (ms):                          13701.40
-Median TTFT (ms):                        13800.64
-P50 TTFT (ms):                           13800.64
-P90 TTFT (ms):                           19100.11
-P99 TTFT (ms):                           30320.21
------Time per Output Token (excl. 1st token)------
-Mean TPOT (ms):                          19.00
-Median TPOT (ms):                        19.06
-P50 TPOT (ms):                           19.06
-P90 TPOT (ms):                           20.41
-P99 TPOT (ms):                           21.94
----------------Inter-token Latency----------------
-Mean ITL (ms):                           59.02
-Median ITL (ms):                         56.45
-P50 ITL (ms):                            56.45
-P90 ITL (ms):                            69.15
-P99 ITL (ms):                            100.81
-==================================================
-说明：每项均为各轮结果的算术平均；百分位数的平均不是合并所有请求后的百分位数。
+
 
 --additional-config '{"ascend_compilation_config":{"enable_npugraph_ex":false}}'
 "ascend_compilation_config":{"enable_npugraph_ex":false}
