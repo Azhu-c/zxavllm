@@ -71,3 +71,39 @@ P99 ITL (ms):                            578.68
 ==================================================
 说明：每项均为各轮结果的算术平均；百分位数的平均不是合并所有请求后的百分位数。
 
+p和d并发都开64
+========== 5 轮结果平均值 ==========
+============ Serving Benchmark Result ============
+Successful requests:                     1000.00
+Failed requests:                         0.00
+Maximum request concurrency:             128.00
+Request rate configured (RPS):           400.00
+Benchmark duration (s):                  1552.36
+Total input tokens:                      10147845.00
+Total generated tokens:                  1281307.00
+Request throughput (req/s):              0.65
+Output token throughput (tok/s):         825.42
+Peak output token throughput (tok/s):    1058.00
+Peak concurrent requests:                132.80
+Total token throughput (tok/s):          7362.72
+---------------Time to First Token----------------
+Mean TTFT (ms):                          5339.07
+Median TTFT (ms):                        3197.44
+P50 TTFT (ms):                           3197.44
+P90 TTFT (ms):                           11202.01
+P99 TTFT (ms):                           32507.56
+-----Time per Output Token (excl. 1st token)------
+Mean TPOT (ms):                          144.41
+Median TPOT (ms):                        148.01
+P50 TPOT (ms):                           148.01
+P90 TPOT (ms):                           156.50
+P99 TPOT (ms):                           166.10
+---------------Inter-token Latency----------------
+Mean ITL (ms):                           448.34
+Median ITL (ms):                         454.58
+P50 ITL (ms):                            454.58
+P90 ITL (ms):                            481.93
+P99 ITL (ms):                            533.58
+==================================================
+说明：每项均为各轮结果的算术平均；百分位数的平均不是合并所有请求后的百分位数。
+
