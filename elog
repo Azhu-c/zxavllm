@@ -1,3 +1,8 @@
+usage: vllm serve [model_tag] [options]
+vllm serve: error: argument --compilation-config/-cc: 1 validation error for CompilationConfig
+  Invalid JSON: expected `:` at line 1 column 40 [type=json_invalid, input_value='{"cudagraph_mode":"FULL_...2,224,256\n    ]\n    }', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/json_invalid
+
 curl --noproxy '*' -sS --max-time 10 \
   http://61.28.30.29:13700/v1/models | python -m json.tool
 grep -RniE -B 3 -A 6 \
