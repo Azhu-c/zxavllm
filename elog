@@ -1,3 +1,6 @@
+  --compilation-config '{"cudagraph_mode":"FULL_DECODE_ONLY",""max_cudagraph_capture_size":256,
+    "cudagraph_capture_sizes":[4,8,12,16,20,24,28,32,40,48,56,64,80,96,112,128,160,192,224,256]}' \
+
 usage: vllm serve [model_tag] [options]
 vllm serve: error: argument --compilation-config/-cc: 1 validation error for CompilationConfig
   Invalid JSON: expected `:` at line 1 column 40 [type=json_invalid, input_value='{"cudagraph_mode":"FULL_...2,224,256\n    ]\n    }', input_type=str]
