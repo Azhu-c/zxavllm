@@ -1,3 +1,25 @@
+cd /workspace/ycp/vllm_serve_run/routing-motivation
+
+python3 - <<'PY'
+import json
+from pathlib import Path
+
+p = Path("config.json")
+cfg = json.loads(p.read_text())
+cfg["request_rate"] = 0
+cfg["repeats"] = 3
+p.write_text(json.dumps(cfg, indent=2))
+PY
+
+# RR、JSQ、KV-aware，各三轮性能测试
+bash run.sh run burst3 --policies rr,jsq,kv
+
+# 三种策略各采样一次，保留原执行模式
+bash run.sh profile native_burst --policies rr,jsq,kv
+
+
+
+
 #  bash run.sh report r1
 bash run.sh report p1
 
