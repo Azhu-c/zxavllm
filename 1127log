@@ -11,10 +11,7 @@ cfg["repeats"] = 3
 p.write_text(json.dumps(cfg, indent=2))
 PY
 
-# RR、JSQ、KV-aware，各三轮性能测试
 bash run.sh run burst3 --policies rr,jsq,kv
-
-# 三种策略各采样一次，保留原执行模式
 bash run.sh profile native_burst --policies rr,jsq,kv
 
 
