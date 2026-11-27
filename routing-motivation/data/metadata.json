@@ -1,0 +1,19 @@
+{
+  "seed": 20261126,
+  "count": 96,
+  "classes": {
+    "SS": 24,
+    "SL": 24,
+    "LS": 24,
+    "LL": 24
+  },
+  "tokenizer": "project supplied Qwen2Tokenizer tokenizer.json",
+  "tokenizer_sha256": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+  "token_count_source": "ASCII subset of supplied byte-level BPE vocabulary and merges; server revalidates with actual model AutoTokenizer",
+  "sha256": "686188bbe46b437d1f478e0927c4364b87556e3409b93275c68d090e67dff7ee",
+  "input_token_counts": [
+    2048,
+    8192
+  ],
+  "status": "bundled prompts; regenerated against actual model at server prepare"
+}

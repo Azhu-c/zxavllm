@@ -1,0 +1,16 @@
+{
+  "automatic_benchmark": {
+    "url": "https://github.com/Azhu-c/zxavllm/blob/ssh/automatic_benchmark.sh",
+    "blob_sha": "58c3bc96c5a8e76d53cc4671d8ac250ab57551db",
+    "use": "BL/P-D lifecycle and script naming; replaced outer orchestrator to collect per-request evidence and avoid global cleanup"
+  },
+  "routing_interface": {
+    "repository": "vllm-project/vllm",
+    "revision": "58d3918",
+    "local_evidence": "outputs/kv-blocks-routing-58d3918/base/vllm/v1/engine/core_client.py",
+    "native_method_sha256": "f9f091f3c1ab38c4de60ff58e216379bd6587570ac9bc3862c74ff9134f06255"
+  },
+  "prior_kv_routing": "outputs/dyntralb-routing-adjustment/modified/vllm_ascend/patch/platform/patch_kv_blocks_routing.py",
+  "workload": "synthetic, deterministic length-controlled prompts; no evaluation accuracy labels",
+  "implementation_status": "local transport/lifecycle tests; real Ascend execution pending"
+}

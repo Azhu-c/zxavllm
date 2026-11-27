@@ -1,0 +1,20 @@
+{
+  "model_path": "/path/to/your/model",
+  "host_ip": "127.0.0.1",
+  "served_model": "qwen3_30B",
+  "scripts_dir": "..",
+  "prefiller_script": "run_vllm_serve_8p8d_asyncSched_p.sh",
+  "decoder_script": "run_vllm_serve_8p8d_asyncSched_d_bl.sh",
+  "proxy_script": "run_proxy_server.sh",
+  "proxy_port": 8080,
+  "prefiller_port": 13700,
+  "decoder_port": 13701,
+  "request_rate": 4,
+  "max_concurrency": 96,
+  "repeats": 3,
+  "report_interval_ms": 100,
+  "profile_seconds": 5,
+  "profile_delay_seconds": 12,
+  "startup_timeout_seconds": 1800,
+  "request_timeout_seconds": 1800
+}
