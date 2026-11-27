@@ -1,0 +1,34 @@
+#  bash run.sh report r1
+bash run.sh report p1
+
+run           valid   completion(s)  output(tok/s)  TTFT-p95(ms)  TPOT-p95(ms)  active-KV-CV
+jsq-r1        True            90.933       1351.329      1284.037        42.673         0.357
+jsq-r2        True            90.198       1362.341      1625.404        43.129         0.367
+jsq-r3        True            90.088       1364.004      2115.628        42.956         0.361
+kv-r1         True            90.107       1363.710      1263.303        43.292         0.284
+kv-r2         True            93.733       1310.960      1587.496        43.096         0.302
+kv-r3         True            90.306       1360.709      1518.580        43.244         0.263
+rr-r1         True            90.210       1362.161      1220.333        43.200         0.352
+rr-r2         True            89.888       1367.038      1367.881        42.041         0.364
+rr-r3         True            90.530       1357.335      1537.246        43.285         0.351
+
+Performance repetitions (median; excludes profiler and validation runs):
+RR: n=3, completion=90.210s, output=1362.161 tok/s, active KV CV=0.352
+JSQ: n=3, completion=90.198s, output=1362.341 tok/s, active KV CV=0.361
+KV: n=3, completion=90.306s, output=1360.709 tok/s, active KV CV=0.284
+SSE chunk gaps are retained as chunk gaps; with MTP they are not per-token ITL.
+Saved: /workspace/ycp/vllm_serve_run/routing-motivation/results/r1/summary.csv
+
+PROFILE / EAGER diagnostic results; keep separate from performance runs.
+
+run           valid   completion(s)  output(tok/s)  TTFT-p95(ms)  TPOT-p95(ms)  active-KV-CV
+jsq-r1        True           397.233        309.340      2184.978       188.266         0.310
+kv-r1         True           400.272        306.992      2586.441       192.888         0.226
+rr-r1         True           398.876        308.065      2200.364       189.017         0.308
+
+Performance repetitions (median; excludes profiler and validation runs):
+jsq-r1: attention ranks=8, duration imbalance proxy=0.140; matched layer/step groups=0; attention-induced bubble wait=N/A
+kv-r1: attention ranks=8, duration imbalance proxy=0.087; matched layer/step groups=0; attention-induced bubble wait=N/A
+rr-r1: attention ranks=8, duration imbalance proxy=0.144; matched layer/step groups=0; attention-induced bubble wait=N/A
+SSE chunk gaps are retained as chunk gaps; with MTP they are not per-token ITL.
+Saved: /workspace/ycp/vllm_serve_run/routing-motivation/results/p1/summary.csv
