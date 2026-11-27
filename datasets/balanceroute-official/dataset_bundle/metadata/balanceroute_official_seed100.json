@@ -1,0 +1,81 @@
+{
+  "name": "BalanceRoute official synthetic seed 100; Qwen3 chat adaptation",
+  "created_date": "2026-11-27",
+  "records": 8000,
+  "seed": 100,
+  "source_type": "official frozen synthetic integer lengths; not proprietary production data",
+  "source_commit": "fdd2a6971ca6222494b1335cc67aaae8e4e28b08",
+  "source_url": "https://github.com/b010001y/BalanceRoute/blob/fdd2a6971ca6222494b1335cc67aaae8e4e28b08/src/balanceroute/reference/r16/inputs/100.npz",
+  "source_npz_sha256": "383a8e89fde24998590518db4d44a872f8e36a7e9b5e617f62c49ef39629e484",
+  "official_ordered_lengths_sha256": "e5eca3ccd0b7abbd03b007c3864d38bff04c241f950779c97e2aded0694b955e",
+  "paper_url": "https://arxiv.org/html/2605.06113v3#S6.SS1",
+  "prompt_text": "new deterministic synthetic English words; authors publish lengths only",
+  "length_policy": "preserve all original s/o pairs and order; s counts the complete single-user Qwen3 chat prompt",
+  "raw_content_tokens": {
+    "min": 120,
+    "max": 65528,
+    "mean": 2991.999875,
+    "sum": 23935999,
+    "p50": 1827.5,
+    "p95": 9148.05,
+    "p99": 19495.510000000053
+  },
+  "chat_template_overhead_tokens": 8,
+  "input_tokens_including_chat_template": {
+    "min": 128,
+    "max": 65536,
+    "mean": 2999.999875,
+    "sum": 23999999,
+    "p50": 1835.5,
+    "p95": 9156.05,
+    "p99": 19503.510000000053
+  },
+  "output_tokens": {
+    "min": 200,
+    "max": 8192,
+    "mean": 1000.003625,
+    "sum": 8000029,
+    "p50": 662.0,
+    "p95": 2931.199999999997,
+    "p99": 5315.170000000004
+  },
+  "max_input_plus_output_tokens": 68321,
+  "arrival_policy": "no timestamps supplied by authors; request-rate controls replay",
+  "tokenizer": {
+    "model": "Qwen/Qwen3-30B-A3B-Instruct-2507",
+    "revision": "0d7cf23991f47feeb3a57ecb4c9cee8ea4a17bfe",
+    "tokenizer_json_sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+    "tokenizer_config_sha256": "a62ff0a2472a0fa1b8eaabcb57c59b58afa42a22831dc141400b6e0cf2b65ce3"
+  },
+  "required_cli": {
+    "backend": "openai-chat",
+    "dataset_name": "custom",
+    "custom_output_len": -1,
+    "skip_chat_template": true,
+    "disable_shuffle": true,
+    "ignore_eos": true
+  },
+  "validation": {
+    "all_8000_schema_and_output_order_checked": true,
+    "all_8000_chat_input_token_counts_checked": true,
+    "distinct_first_16_token_blocks": 8000,
+    "npu_serving_executed": false,
+    "vllm_custom_dataset_sample_smoke": {
+      "source_url": "https://github.com/vllm-project/vllm/blob/58d3918e3ea0a544ffedadad2ba84559e9c51d8f/vllm/benchmarks/datasets/datasets.py",
+      "method": "unmodified upstream CustomDataset.sample; tokenizer/base/container adapters; no vLLM service",
+      "checked_rows_1based": [
+        1,
+        2,
+        3,
+        200,
+        294,
+        4000,
+        5445
+      ],
+      "passed": true
+    }
+  },
+  "jsonl_file": "balanceroute_official_seed100_8000_qwen3_chat.jsonl",
+  "jsonl_bytes": 125980587,
+  "jsonl_sha256": "e5000283b735517bceeef096630c01ccc35b8cd40a0b148a7db6bc4460df365c"
+}
